@@ -26,6 +26,7 @@ function help() {
 
 Commands:
   refdata                         fetch live specs (thin wrapper: scripts/refdata.mjs)
+  apps       [--bundle <bundleId>] find the App Store Connect app id
   library    --app <id>           show the app's asset library id
   localizations --app <id> [--version <v>] [--platform IOS]
                                   list versions and localization ids
@@ -93,6 +94,23 @@ async function cmdLocalizations(flags) {
       state: asc.attrsOf(v).appStoreState,
     })),
   }, null, 2));
+}
+
+async function cmdApps(flags) {
+  const config = await requireConfig();
+  const bundleId = typeof flags.bundle === 'string' ? flags.bundle : null;
+  const { json } = await asc.ascFetch(config, `/apps${asc.qs({
+    limit: 200,
+    'fields[apps]': 'name,bundleId,sku,primaryLocale',
+  })}`);
+  const apps = (json?.data || []).map((app) => ({
+    id: app.id,
+    name: asc.attrsOf(app).name,
+    bundleId: asc.attrsOf(app).bundleId,
+    primaryLocale: asc.attrsOf(app).primaryLocale,
+  }));
+  const filtered = bundleId ? apps.filter((app) => app.bundleId === bundleId) : apps;
+  console.log(JSON.stringify({ count: filtered.length, apps: filtered }, null, 2));
 }
 
 async function cmdGroups(flags) {
@@ -176,7 +194,7 @@ async function cmdUpload(flags) {
   }
 
   if (!execute) {
-    console.log(JSON.stringify({
+    const report = {
       ok: true,
       dryRun: true,
       appId,
@@ -186,7 +204,66 @@ async function cmdUpload(flags) {
       validation: summary,
       actions,
       note: 'Re-run with --execute after an explicit confirmation to upload and create placements.',
-    }, null, 2));
+    };
+
+    // With credentials, rehearse against live App Store Connect state: resolve
+    // the version/localizations, check each file fits a live spec for its
+    // placement type + group, and count the placements that would be replaced.
+    if (hasCredentials) {
+      try {
+        const live = { libraryId: await asc.getAssetLibrary(config, appId) };
+        const refData = await asc.getRefData(config);
+        const platform = String(flags.platform || 'IOS');
+        const needsVersion = plan.assets.some((a) => !String(a.kind || '').startsWith('event'));
+        if (needsVersion) {
+          const versions = await asc.listVersions(config, appId, platform);
+          const wanted = typeof flags.version === 'string' ? flags.version : null;
+          const version = wanted
+            ? versions.find((v) => asc.attrsOf(v).versionString === wanted)
+            : versions.find((v) => asc.attrsOf(v).appStoreState === 'PREPARE_FOR_SUBMISSION');
+          if (version) {
+            live.version = { id: version.id, versionString: asc.attrsOf(version).versionString, state: asc.attrsOf(version).appStoreState };
+            live.localizations = (await asc.listVersionLocalizations(config, version.id)).map((l) => ({ id: l.id, locale: asc.attrsOf(l).locale }));
+            live.targetLocalization = (live.localizations || []).find((l) => l.locale === (plan.locale || 'en-US')) || null;
+          } else {
+            live.versionError = wanted ? `version ${wanted} not found` : `no editable ${platform} version found`;
+          }
+        }
+        if (live.targetLocalization) {
+          live.checks = [];
+          for (const asset of plan.assets) {
+            const spec = getSpec(snapshot.data, asset.spec);
+            const placementType = asset.placementType || spec.placementType;
+            const group = asset.placementGroup || spec.placementGroup || (typeof flags.group === 'string' ? flags.group : null);
+            const allowed = placementType && group ? asc.specIdsForGroup(refData, placementType, group) : null;
+            let fits = null;
+            for (const specId of allowed || []) {
+              const cover = asc.specCovers(refData, specId, spec.width, spec.height);
+              if (cover && cover.ok) { fits = { specId, shortName: cover.shortName }; break; }
+            }
+            let existing = null;
+            try {
+              const placements = await asc.listPlacements(config, 'appStoreVersionLocalization', live.targetLocalization.id, { placementType, placementGroup: group });
+              existing = placements.map((p) => p.id);
+            } catch { /* ignore */ }
+            live.checks.push({
+              id: asset.id,
+              placementType,
+              placementGroup: group,
+              fitsLiveSpec: fits ? true : (allowed && allowed.length ? false : null),
+              matchedSpec: fits ? fits.shortName : null,
+              liveSpecIds: (allowed || []).length,
+              wouldReplacePlacements: existing ? existing.length : null,
+            });
+          }
+        }
+        report.live = live;
+      } catch (err) {
+        report.liveError = err?.message || String(err);
+      }
+    }
+
+    console.log(JSON.stringify(report, null, 2));
     return;
   }
 
@@ -365,6 +442,7 @@ async function main() {
       process.exit(res.status ?? 1);
       break;
     }
+    case 'apps': await cmdApps(flags); break;
     case 'library': await cmdLibrary(flags); break;
     case 'localizations': await cmdLocalizations(flags); break;
     case 'groups': await cmdGroups(flags); break;

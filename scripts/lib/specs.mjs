@@ -36,8 +36,10 @@ export async function loadSnapshot(explicitPath) {
 export function getSpec(snapshot, key) {
   const spec = snapshot?.specs?.[key];
   if (!spec) {
-    const available = Object.keys(snapshot?.specs || {}).join(', ');
-    throw new Error(`unknown spec "${key}". Available: ${available}`);
+    const keys = Object.keys(snapshot?.specs || {});
+    const shown = keys.slice(0, 12).join(', ');
+    const more = keys.length > 12 ? `, … (${keys.length} total)` : '';
+    throw new Error(`unknown spec "${key}". Available: ${shown}${more}`);
   }
   return spec;
 }

@@ -219,7 +219,7 @@
       "cssHeight": 823,
       "placementType": "PRODUCT_PAGE_HEADER_ASSET",
       "category": "CREATIVE_ASSETS",
-      "placementGroup": null,
+      "placementGroup": "DEFAULT_PROFILE",
       "formats": [
         ".png",
         ".jpg",
@@ -242,7 +242,7 @@
       "cssHeight": 1475,
       "placementType": "PRODUCT_PAGE_HEADER_ASSET_OR_APP_STORE_SEARCH_RESULTS_ASSET",
       "category": "CREATIVE_ASSETS",
-      "placementGroup": null,
+      "placementGroup": "DEFAULT_PROFILE",
       "formats": [
         ".png"
       ],
@@ -257,7 +257,7 @@
       "cssHeight": 1280,
       "placementType": "APP_STORE_SEARCH_RESULTS_ASSET",
       "category": "CREATIVE_ASSETS",
-      "placementGroup": null,
+      "placementGroup": "DEFAULT_PROFILE",
       "formats": [
         ".png",
         ".jpg",
@@ -280,7 +280,7 @@
       "cssHeight": 1080,
       "placementType": "EVENT_CARD_ASSET",
       "category": "CREATIVE_ASSETS",
-      "placementGroup": null,
+      "placementGroup": "DEFAULT_PROFILE",
       "formats": [
         ".png",
         ".jpg",
@@ -295,9 +295,9 @@
       "height": 3840,
       "cssWidth": 1080,
       "cssHeight": 1920,
-      "placementType": null,
+      "placementType": "EVENT_DETAILS_PAGE_ASSET",
       "category": "CREATIVE_ASSETS",
-      "placementGroup": null,
+      "placementGroup": "DEFAULT_PROFILE",
       "formats": [
         ".png",
         ".jpg",
@@ -365,7 +365,7 @@
       "cssHeight": 248,
       "placementType": "APP_SCREENSHOT",
       "category": "APP_SCREENSHOTS_AND_PREVIEWS",
-      "placementGroup": null,
+      "placementGroup": "WATCH_SERIES_10_PROFILE",
       "formats": [
         ".png",
         ".jpg",
@@ -382,7 +382,7 @@
       "cssHeight": 257,
       "placementType": "APP_SCREENSHOT",
       "category": "APP_SCREENSHOTS_AND_PREVIEWS",
-      "placementGroup": null,
+      "placementGroup": "WATCH_ULTRA_PROFILE",
       "formats": [
         ".png",
         ".jpg",
@@ -407,28 +407,43 @@
     "PRODUCT_PAGE_HEADER_ASSET": {
       "category": "CREATIVE_ASSETS",
       "orderable": false,
-      "documented": true
+      "documented": true,
+      "group": "DEFAULT_PROFILE"
     },
     "APP_STORE_SEARCH_RESULTS_ASSET": {
       "category": "CREATIVE_ASSETS",
       "orderable": false,
-      "documented": true
+      "documented": true,
+      "group": "DEFAULT_PROFILE"
     },
     "EVENT_CARD_ASSET": {
       "category": "CREATIVE_ASSETS",
       "orderable": false,
-      "documented": true
+      "documented": true,
+      "group": "DEFAULT_PROFILE"
     },
-    "EVENT_DETAIL_ASSET": {
+    "EVENT_DETAILS_PAGE_ASSET": {
       "category": "CREATIVE_ASSETS",
       "orderable": false,
-      "documented": false,
-      "note": "exact id must be read from ref data"
+      "documented": true,
+      "group": "DEFAULT_PROFILE"
+    },
+    "IMESSAGE_APP_SCREENSHOT": {
+      "category": "APP_SCREENSHOTS_AND_PREVIEWS",
+      "orderable": true,
+      "documented": true,
+      "v1": false
     }
   },
   "documentedGroups": [
     "IPHONE_DYNAMIC_ISLAND_LARGE_PROFILE",
+    "IPHONE_DYNAMIC_ISLAND_MEDIUM_PROFILE",
+    "IPAD_13_PROFILE",
+    "WATCH_SERIES_10_PROFILE",
+    "WATCH_ULTRA_PROFILE",
     "MAC_PROFILE",
-    "IMESSAGE_IPHONE_DYNAMIC_ISLAND_LARGE_PROFILE"
+    "TV_PROFILE",
+    "VISION_PRO_PROFILE",
+    "DEFAULT_PROFILE"
   ]
 }

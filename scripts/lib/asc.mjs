@@ -178,7 +178,7 @@ export function refdataGroups(payload, placementType) {
   const summary = refdataSummary(payload);
   const type = summary.placementTypes.find((entry) => {
     const a = attrs(entry);
-    return a.placementType === placementType || a.id === placementType || a.type === placementType;
+    return a.placementTypeId === placementType || a.placementType === placementType || a.id === placementType || a.type === placementType;
   });
   if (!type) return [];
   const a = attrs(type);
@@ -186,7 +186,7 @@ export function refdataGroups(payload, placementType) {
   const out = [];
   for (const mapping of mappings) {
     const m = attrs(mapping);
-    const group = m.placementGroup || m.group || m.placementProfileGroup || m.groupId;
+    const group = m.placementGroupId || m.placementGroup || m.group || m.placementProfileGroup || m.groupId;
     if (group) out.push({ group, specs: m.specs || m.specIds || m.specificationIds || [] });
   }
   return out;
@@ -196,17 +196,35 @@ export function specIdsForGroup(payload, placementType, placementGroup) {
   const summary = refdataSummary(payload);
   const type = summary.placementTypes.find((entry) => {
     const a = attrs(entry);
-    return a.placementType === placementType || a.id === placementType || a.type === placementType;
+    return a.placementTypeId === placementType || a.placementType === placementType || a.id === placementType || a.type === placementType;
   });
   if (!type) return null;
   const a = attrs(type);
   const mappings = a.specMappings || a.specsByGroup || [];
   for (const mapping of mappings) {
     const m = attrs(mapping);
-    const group = m.placementGroup || m.group || m.placementProfileGroup || m.groupId;
+    const group = m.placementGroupId || m.placementGroup || m.group || m.placementProfileGroup || m.groupId;
     if (group === placementGroup) return m.specs || m.specIds || m.specificationIds || [];
   }
   return null;
+}
+
+export function imageSpecById(payload, specId) {
+  const summary = refdataSummary(payload);
+  const found = summary.imageSpecs.find((entry) => {
+    const a = attrs(entry);
+    return a.specId === specId || a.id === specId;
+  });
+  return found ? attrs(found) : null;
+}
+
+export function specCovers(payload, specId, width, height) {
+  const spec = imageSpecById(payload, specId);
+  if (!spec) return null;
+  const dims = spec.dimensions || {};
+  const ok = Number(dims.minWidth) <= width && width <= Number(dims.maxWidth)
+    && Number(dims.minHeight) <= height && height <= Number(dims.maxHeight);
+  return { ok, shortName: spec.shortName, minWidth: dims.minWidth, maxWidth: dims.maxWidth, minHeight: dims.minHeight, maxHeight: dims.maxHeight };
 }
 
 export function imageSpecByShortName(payload, shortName) {

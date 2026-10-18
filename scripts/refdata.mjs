@@ -16,9 +16,46 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { parseArgs, fail } from './lib/daemon.mjs';
 import { loadAscConfig, assertAscConfig, getRefData, refdataSummary, refdataGroups, attrsOf } from './lib/asc.mjs';
+import { loadSnapshot } from './lib/specs.mjs';
 
 function num(value, fallback = null) {
   return Number.isFinite(Number(value)) ? Number(value) : fallback;
+}
+
+function liveSpecMatches(liveSpec, width, height, placementType) {
+  const dims = liveSpec.dimensions || {};
+  const covers = Number(dims.minWidth) <= width && width <= Number(dims.maxWidth)
+    && Number(dims.minHeight) <= height && height <= Number(dims.maxHeight);
+  const compatible = Array.isArray(liveSpec.compatiblePlacementTypes) ? liveSpec.compatiblePlacementTypes : [];
+  const typeOk = !placementType || compatible.includes(placementType);
+  return covers && typeOk;
+}
+
+// Apple ships its own spec ids; our plans use stable canonical keys. Alias each
+// canonical key onto the live spec that covers the same pixels + placement type,
+// so the uploader can verify against live data without the plan changing.
+function mergeCanonicalKeys(normalized, imageSpecs) {
+  return loadSnapshot()
+    .then(({ data }) => {
+      let merged = 0;
+      for (const [key, spec] of Object.entries(data.specs || {})) {
+        if (!spec || typeof spec.width !== 'number') continue;
+        const live = imageSpecs.find((entry) => liveSpecMatches(attrsOf(entry), spec.width, spec.height, spec.placementType));
+        if (!live) continue;
+        const a = attrsOf(live);
+        const dims = a.dimensions || {};
+        normalized.specs[key] = {
+          ...spec,
+          specId: a.specId,
+          liveShortName: a.shortName,
+          minWidth: dims.minWidth, maxWidth: dims.maxWidth,
+          minHeight: dims.minHeight, maxHeight: dims.maxHeight,
+        };
+        merged += 1;
+      }
+      return merged;
+    })
+    .catch(() => 0);
 }
 
 function normalize(payload) {
@@ -52,7 +89,7 @@ function normalize(payload) {
   const groups = summary.groups.map((entry) => {
     const a = attrsOf(entry);
     return {
-      id: a.placementGroup || a.groupId || a.id,
+      id: a.placementProfileGroupId || a.placementGroup || a.groupId || a.id,
       platform: a.platform || a.placementPlatform || null,
       displayClass: a.displayClass || null,
       raw: a,
@@ -62,11 +99,14 @@ function normalize(payload) {
   const placementTypes = {};
   for (const entry of summary.placementTypes) {
     const a = attrsOf(entry);
-    const id = a.placementType || a.id;
+    const id = a.placementTypeId || a.placementType || a.id;
     if (!id) continue;
     placementTypes[id] = {
       acceptsAssetCategories: a.acceptsAssetCategories || a.assetCategories || [],
-      specMappings: a.specMappings || a.specsByGroup || [],
+      specMappings: (a.specMappings || a.specsByGroup || []).map((m) => ({
+        placementGroupId: m.placementGroupId || m.placementGroup || m.group || m.placementProfileGroup,
+        specs: m.specs || m.specIds || [],
+      })),
       orderable: a.orderable,
     };
   }
@@ -118,6 +158,7 @@ Requires ASC credentials. See README.md → ASC credentials.
   const out = path.resolve(String(flags.out || '.app-store-assets/references/refdata-live.json'));
   const rawOut = path.resolve(String(flags.raw || '.app-store-assets/references/refdata-raw.json'));
   const normalized = normalize(payload);
+  const merged = await mergeCanonicalKeys(normalized, refdataSummary(payload).imageSpecs);
 
   await fs.mkdir(path.dirname(out), { recursive: true });
   await fs.writeFile(out, `${JSON.stringify(normalized, null, 2)}\n`, 'utf8');
@@ -142,6 +183,7 @@ Requires ASC credentials. See README.md → ASC credentials.
     out: path.relative(process.cwd(), out),
     raw: path.relative(process.cwd(), rawOut),
     imageSpecs: Object.keys(normalized.specs).length,
+    canonicalKeysMerged: merged,
     groups: normalized.groups.length,
     placementTypes: Object.keys(normalized.placementTypes).length,
   };
@@ -149,7 +191,7 @@ Requires ASC credentials. See README.md → ASC credentials.
     console.log(JSON.stringify(summary, null, 2));
   } else {
     console.log(`\n✓ live ref data saved`);
-    console.log(`  specs: ${summary.imageSpecs} · groups: ${summary.groups} · placement types: ${summary.placementTypes}`);
+    console.log(`  specs: ${summary.imageSpecs} (${summary.canonicalKeysMerged} canonical keys merged) · groups: ${summary.groups} · placement types: ${summary.placementTypes}`);
     console.log(`  ${summary.out}`);
     console.log(`  ${summary.raw}\n`);
     console.log('Next: pass the normalized file to the validator and uploader with --refdata ' + summary.out);
