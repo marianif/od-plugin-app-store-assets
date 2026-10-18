@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>In-App Event details page</title>
+<style>
+  :root {
+    --u: calc(100vw / 1080);
+    --bg: #0f2a22;
+    --ink: #f4efe6;
+    --accent: #8fd9b8;
+    --muted: #b9cfc5;
+    --cream: #f4efe6;
+    --panel: #e9f4ef;
+    {{THEME}}
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    color: var(--ink);
+  }
+  .canvas {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background:
+      radial-gradient(calc(800 * var(--u)) calc(800 * var(--u)) at 70% 22%, color-mix(in srgb, var(--accent) 30%, transparent) 0%, transparent 64%),
+      linear-gradient(160deg, color-mix(in srgb, var(--bg) 90%, #000 10%) 0%, var(--bg) 52%, color-mix(in srgb, var(--bg) 76%, #000 24%) 100%);
+    overflow: hidden;
+  }
+  .badge-safe { position: absolute; left: 0; top: 0; width: calc(200 * var(--u)); height: calc(200 * var(--u)); }
+  .device {
+    position: absolute;
+    left: 50%;
+    top: calc(210 * var(--u));
+    width: calc(660 * var(--u));
+    height: calc(1372 * var(--u));
+    transform: translateX(-50%);
+    border-radius: calc(96 * var(--u));
+    background: #0b1f19;
+    padding: calc(17 * var(--u));
+    box-shadow: 0 calc(44 * var(--u)) calc(90 * var(--u)) rgba(0, 0, 0, .34);
+  }
+  .device .screen {
+    width: 100%; height: 100%;
+    border-radius: calc(80 * var(--u));
+    overflow: hidden;
+    background: var(--panel);
+    display: grid;
+    place-items: center;
+  }
+  .device img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .device .ph { color: #5a6b64; font-size: calc(22 * var(--u)); }
+  .copy {
+    position: absolute;
+    left: calc(72 * var(--u));
+    right: calc(72 * var(--u));
+    bottom: calc(84 * var(--u));
+    text-align: center;
+  }
+  .kicker {
+    font-size: calc(26 * var(--u));
+    font-weight: 650;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: calc(22 * var(--u));
+  }
+  .title {
+    font-size: calc({{TITLE_SIZE}} * var(--u));
+    line-height: 1.0;
+    letter-spacing: -.04em;
+    font-weight: 780;
+    max-height: calc(172 * var(--u));
+    overflow: hidden;
+    text-wrap: balance;
+  }
+  .sub {
+    margin-top: calc(20 * var(--u));
+    font-size: calc(28 * var(--u));
+    color: var(--muted);
+  }
+  .rings { position: absolute; left: calc(-260 * var(--u)); top: calc(-200 * var(--u)); width: calc(900 * var(--u)); height: calc(900 * var(--u)); opacity: .3; }
+  .rings span { position: absolute; inset: 0; border: calc(1.5 * var(--u)) solid color-mix(in srgb, var(--accent) 42%, transparent); border-radius: 50%; }
+  .rings span:nth-child(2) { inset: calc(100 * var(--u)); opacity: .6; }
+  .rings span:nth-child(3) { inset: calc(200 * var(--u)); opacity: .36; }
+  .rings span:nth-child(4) { inset: calc(300 * var(--u)); opacity: .2; }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <div class="badge-safe"></div>
+  <div class="rings"><span></span><span></span><span></span><span></span></div>
+  <div class="device"><div class="screen">{{SHOT_BLOCK}}</div></div>
+  <div class="copy">
+    <div class="kicker">{{KICKER}}</div>
+    <div class="title">{{TITLE}}</div>
+    {{SUB_BLOCK}}
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>App Store product page header</title>
+<style>
+  :root {
+    --u: calc(100vw / 1920);
+    --bg: #0f2a22;
+    --ink: #0f2a22;
+    --accent: #8fd9b8;
+    --muted: #b9cfc5;
+    --cream: #f4efe6;
+    --mark: #f4efe6;
+    --mark-ink: #0f2a22;
+    {{THEME}}
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    color: var(--cream);
+  }
+  .canvas {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background:
+      radial-gradient(calc(1200 * var(--u)) calc(620 * var(--u)) at 76% 18%, color-mix(in srgb, var(--accent) 32%, transparent) 0%, transparent 62%),
+      radial-gradient(calc(900 * var(--u)) calc(520 * var(--u)) at 12% 110%, color-mix(in srgb, var(--accent) 20%, transparent) 0%, transparent 60%),
+      linear-gradient(128deg, color-mix(in srgb, var(--bg) 88%, #000 12%) 0%, var(--bg) 46%, color-mix(in srgb, var(--bg) 78%, #000 22%) 100%);
+    overflow: hidden;
+  }
+  .rings { position: absolute; right: calc(-180 * var(--u)); top: calc(-260 * var(--u)); width: calc(980 * var(--u)); height: calc(980 * var(--u)); opacity: .5; }
+  .rings span { position: absolute; inset: 0; border: calc(1.5 * var(--u)) solid color-mix(in srgb, var(--accent) 40%, transparent); border-radius: 50%; }
+  .rings span:nth-child(2) { inset: calc(90 * var(--u)); opacity: .7; }
+  .rings span:nth-child(3) { inset: calc(180 * var(--u)); opacity: .45; }
+  .rings span:nth-child(4) { inset: calc(270 * var(--u)); opacity: .28; }
+  .dotgrid {
+    position: absolute;
+    left: calc(120 * var(--u));
+    bottom: calc(70 * var(--u));
+    width: calc(360 * var(--u));
+    height: calc(140 * var(--u));
+    background-image: radial-gradient(color-mix(in srgb, var(--accent) 55%, transparent) calc(1.4 * var(--u)), transparent calc(1.4 * var(--u)));
+    background-size: calc(26 * var(--u)) calc(26 * var(--u));
+    opacity: .45;
+  }
+  .safe {
+    position: absolute;
+    left: calc(548 * var(--u));
+    top: calc(246 * var(--u));
+    width: calc(824 * var(--u));
+    height: calc(330 * var(--u));
+    display: flex;
+    align-items: center;
+    gap: calc(44 * var(--u));
+  }
+  .mark {
+    flex: 0 0 auto;
+    width: calc(132 * var(--u));
+    height: calc(132 * var(--u));
+    border-radius: calc(30 * var(--u));
+    background: var(--mark);
+    color: var(--mark-ink);
+    display: grid;
+    place-items: center;
+    font-size: calc(58 * var(--u));
+    font-weight: 800;
+    letter-spacing: -.05em;
+    box-shadow: 0 calc(17 * var(--u)) calc(34 * var(--u)) rgba(0, 0, 0, .22);
+    overflow: hidden;
+  }
+  .mark img { width: 100%; height: 100%; object-fit: cover; }
+  .copy { min-width: 0; }
+  .name {
+    font-size: calc(52 * var(--u));
+    line-height: 1.05;
+    letter-spacing: -.035em;
+    font-weight: 750;
+  }
+  .tagline {
+    margin-top: calc(14 * var(--u));
+    font-size: calc(25 * var(--u));
+    line-height: 1.3;
+    color: var(--muted);
+    max-width: calc(600 * var(--u));
+    text-wrap: balance;
+  }
+  .hairline { margin-top: calc(22 * var(--u)); width: calc(72 * var(--u)); height: calc(3 * var(--u)); border-radius: 99px; background: var(--accent); opacity: .8; }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <div class="rings"><span></span><span></span><span></span><span></span></div>
+  <div class="dotgrid"></div>
+  <div class="safe">
+    <div class="mark">{{MARK_BLOCK}}</div>
+    <div class="copy">
+      <div class="name">{{NAME}}</div>
+      {{TAGLINE_BLOCK}}
+      {{HAIRLINE_BLOCK}}
+    </div>
+  </div>
+</div>
+</body>
+</html>

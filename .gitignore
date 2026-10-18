@@ -1,0 +1,13 @@
+# Local working files produced during a run
+.app-store-assets/
+store/
+.asc/
+*.local.json
+*.log
+
+# macOS
+.DS_Store
+
+# Secrets — never commit
+.env
+*.p8

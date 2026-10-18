@@ -1,0 +1,17 @@
+/*
+ * App Store Assets — example brand tokens.
+ *
+ * These are the six variables every canvas reads. Copy them into your plan's
+ * `theme` object (or into a project-level DESIGN.md) and replace with the app's
+ * real tokens. The defaults shipped in the canvases are a warm cream/deep-green
+ * palette that reads well on the App Store; do not ship them unchanged unless
+ * they are actually the brand.
+ */
+:root {
+  --bg: #f4efe6;      /* canvas background */
+  --ink: #0f2a22;     /* primary text */
+  --accent: #206956;  /* eyebrow / highlights */
+  --muted: #5a6b64;   /* secondary text */
+  --panel: #e9f4ef;   /* device screen fallback */
+  --cream: #f4efe6;   /* text on dark backgrounds */
+}

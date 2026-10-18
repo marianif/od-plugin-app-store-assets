@@ -1,0 +1,158 @@
+{
+  "$schema": "https://open-design.ai/schemas/plugin.v1.json",
+  "specVersion": "1.0.0",
+  "name": "app-store-assets",
+  "title": "App Store Assets",
+  "version": "0.1.0",
+  "publishedAt": "2026-10-18T00:00:00Z",
+  "description": "Generate, validate and upload App Store artwork: screenshots, product-page header, search-results creative and In-App Event media, at Apple's exact specs and with the asset best-practices rules applied as a pre-flight check.",
+  "license": "MIT",
+  "tags": [
+    "create",
+    "image",
+    "app-store",
+    "screenshots",
+    "marketing",
+    "mobile",
+    "ios",
+    "app-store-connect"
+  ],
+  "compat": {
+    "agentSkills": [
+      { "path": "./SKILL.md" }
+    ]
+  },
+  "od": {
+    "kind": "skill",
+    "taskKind": "new-generation",
+    "mode": "image",
+    "platform": "mobile",
+    "scenario": "marketing",
+    "surface": "image",
+    "preview": {
+      "type": "html",
+      "entry": "./preview/index.html",
+      "motion": "scroll"
+    },
+    "useCase": {
+      "query": "Create and upload App Store assets for {{app}}: screenshots, product page header, search results creative and In-App Event media. Validate everything against Apple's specs before publishing.",
+      "exampleOutputs": [
+        { "path": "./examples/trackly/index.html", "title": "Trackly — full asset set" }
+      ]
+    },
+    "context": {
+      "skills": [
+        { "path": "./SKILL.md" }
+      ],
+      "assets": [
+        "./assets/canvases/screenshot.html",
+        "./assets/canvases/header.html",
+        "./assets/canvases/search.html",
+        "./assets/canvases/event-card.html",
+        "./assets/canvases/event-detail.html",
+        "./assets/tokens.example.css",
+        "./scripts/bootstrap.mjs",
+        "./scripts/compose.mjs",
+        "./scripts/render.mjs",
+        "./scripts/validate.mjs",
+        "./scripts/refdata.mjs",
+        "./scripts/asc-upload.mjs",
+        "./scripts/lib/daemon.mjs",
+        "./scripts/lib/image.mjs",
+        "./scripts/lib/plan.mjs",
+        "./scripts/lib/specs.mjs",
+        "./scripts/lib/asc.mjs",
+        "./references/apple-asset-rules.md",
+        "./references/asc-asset-library.md",
+        "./references/copy-guidelines.md",
+        "./references/refdata-snapshot.json"
+      ]
+    },
+    "pipeline": {
+      "stages": [
+        {
+          "id": "intake",
+          "atoms": ["discovery-question-form"]
+        },
+        {
+          "id": "plan",
+          "atoms": ["todo-write"]
+        },
+        {
+          "id": "compose",
+          "atoms": ["file-write", "live-artifact"]
+        },
+        {
+          "id": "critique",
+          "atoms": ["critique-theater"],
+          "repeat": true,
+          "until": "critique.score>=4 || iterations>=2"
+        },
+        {
+          "id": "publish",
+          "atoms": ["handoff"]
+        }
+      ]
+    },
+    "genui": {
+      "surfaces": [
+        {
+          "id": "confirm-upload",
+          "kind": "confirmation",
+          "persist": "run",
+          "trigger": { "stageId": "publish", "atom": "handoff" },
+          "prompt": "Upload these validated assets to App Store Connect and create placements? This is the first change visible in App Store Connect."
+        }
+      ]
+    },
+    "inputs": [
+      {
+        "name": "app",
+        "type": "string",
+        "required": true,
+        "label": "App name"
+      },
+      {
+        "name": "ascAppId",
+        "type": "string",
+        "required": false,
+        "label": "App Store Connect app id"
+      },
+      {
+        "name": "versionString",
+        "type": "string",
+        "required": false,
+        "label": "Version (e.g. 1.4)"
+      },
+      {
+        "name": "assetSet",
+        "type": "select",
+        "required": false,
+        "label": "Asset set",
+        "options": ["screenshots", "creative", "events", "all"],
+        "default": "screenshots"
+      },
+      {
+        "name": "locale",
+        "type": "string",
+        "required": false,
+        "label": "Locale",
+        "default": "en-US"
+      },
+      {
+        "name": "upload",
+        "type": "boolean",
+        "required": false,
+        "label": "Upload after validation",
+        "default": false
+      }
+    ],
+    "capabilities": [
+      "prompt:inject",
+      "fs:read",
+      "fs:write",
+      "bash",
+      "network"
+    ]
+  }
+}

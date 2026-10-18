@@ -1,0 +1,233 @@
+{
+  "capturedAt": "2026-10-18",
+  "source": "developer.apple.com/app-store/asset-best-practices + App Store Connect Help (screenshot/app-preview/creative assets) + ASC API Asset Library docs",
+  "purpose": "Offline fallback for composing and validating files. The upload path MUST refresh GET /v1/appAssetLibraryRefData and resolve placement groups/specIds live.",
+  "notes": [
+    "Screenshot specs are exact: minWidth === maxWidth and minHeight === maxHeight.",
+    "cssWidth/cssHeight are the values the desktop renderer takes; output pixels are 2x (deviceScaleFactor 2).",
+    "placementGroup values marked null are not documented as fixed ids; read them from ref data.",
+    "v1 targets the entries with \"v1\": true. Others are included so the validator can recognize them."
+  ],
+  "renderer": {
+    "scale": 2,
+    "rule": "export width/height are CSS points; PNG output = css * 2",
+    "alpha": "must be false for every App Store asset"
+  },
+  "limits": {
+    "screenshotsPerGroup": 10,
+    "appPreviewsPerGroup": 3,
+    "headerPerGroup": 1,
+    "searchPerLocalization": 1,
+    "eventAssetsPerPlacementType": 1,
+    "maxImageBytes": 524288000
+  },
+  "specs": {
+    "iphone-1320x2868": {
+      "label": "iPhone with Dynamic Island — large (6.9\")",
+      "width": 1320, "height": 2868, "cssWidth": 660, "cssHeight": 1434,
+      "placementType": "APP_SCREENSHOT",
+      "category": "APP_SCREENSHOTS_AND_PREVIEWS",
+      "placementGroup": "IPHONE_DYNAMIC_ISLAND_LARGE_PROFILE",
+      "formats": [".png", ".jpg", ".jpeg"],
+      "alphaAllowed": false,
+      "v1": true
+    },
+    "iphone-1290x2796": {
+      "label": "iPhone with Dynamic Island — large (6.7\")",
+      "width": 1290, "height": 2796, "cssWidth": 645, "cssHeight": 1398,
+      "placementType": "APP_SCREENSHOT",
+      "category": "APP_SCREENSHOTS_AND_PREVIEWS",
+      "placementGroup": "IPHONE_DYNAMIC_ISLAND_LARGE_PROFILE",
+      "formats": [".png", ".jpg", ".jpeg"],
+      "alphaAllowed": false,
+      "v1": true
+    },
+    "iphone-1260x2736": {
+      "label": "iPhone with Dynamic Island — large (6.5\")",
+      "width": 1260, "height": 2736, "cssWidth": 630, "cssHeight": 1368,
+      "placementType": "APP_SCREENSHOT",
+      "category": "APP_SCREENSHOTS_AND_PREVIEWS",
+      "placementGroup": "IPHONE_DYNAMIC_ISLAND_LARGE_PROFILE",
+      "formats": [".png", ".jpg", ".jpeg"],
+      "alphaAllowed": false,
+      "v1": false
+    },
+    "iphone-1206x2622": {
+      "label": "iPhone with Dynamic Island — medium (required minimum)",
+      "width": 1206, "height": 2622, "cssWidth": 603, "cssHeight": 1311,
+      "placementType": "APP_SCREENSHOT",
+      "category": "APP_SCREENSHOTS_AND_PREVIEWS",
+      "placementGroup": null,
+      "probablePlacementGroup": "IPHONE_DYNAMIC_ISLAND_MEDIUM_PROFILE",
+      "formats": [".png", ".jpg", ".jpeg"],
+      "alphaAllowed": false,
+      "v1": true
+    },
+    "iphone-1179x2556": {
+      "label": "iPhone with Dynamic Island — medium (required minimum)",
+      "width": 1179, "height": 2556, "cssWidth": 589.5, "cssHeight": 1278,
+      "placementType": "APP_SCREENSHOT",
+      "category": "APP_SCREENSHOTS_AND_PREVIEWS",
+      "placementGroup": null,
+      "probablePlacementGroup": "IPHONE_DYNAMIC_ISLAND_MEDIUM_PROFILE",
+      "formats": [".png", ".jpg", ".jpeg"],
+      "alphaAllowed": false,
+      "v1": true
+    },
+    "iphone-1284x2778": {
+      "label": "iPhone with Face ID — large",
+      "width": 1284, "height": 2778, "cssWidth": 642, "cssHeight": 1389,
+      "placementType": "APP_SCREENSHOT",
+      "category": "APP_SCREENSHOTS_AND_PREVIEWS",
+      "placementGroup": null,
+      "formats": [".png", ".jpg", ".jpeg"],
+      "alphaAllowed": false,
+      "v1": false
+    },
+    "iphone-1242x2688": {
+      "label": "iPhone with Face ID — large",
+      "width": 1242, "height": 2688, "cssWidth": 621, "cssHeight": 1344,
+      "placementType": "APP_SCREENSHOT",
+      "category": "APP_SCREENSHOTS_AND_PREVIEWS",
+      "placementGroup": null,
+      "formats": [".png", ".jpg", ".jpeg"],
+      "alphaAllowed": false,
+      "v1": false
+    },
+    "ipad-2064x2752": {
+      "label": "iPad 13\"",
+      "width": 2064, "height": 2752, "cssWidth": 1032, "cssHeight": 1376,
+      "placementType": "APP_SCREENSHOT",
+      "category": "APP_SCREENSHOTS_AND_PREVIEWS",
+      "placementGroup": null,
+      "formats": [".png", ".jpg", ".jpeg"],
+      "alphaAllowed": false,
+      "v1": true
+    },
+    "ipad-2048x2732": {
+      "label": "iPad 13\" (alternate)",
+      "width": 2048, "height": 2732, "cssWidth": 1024, "cssHeight": 1366,
+      "placementType": "APP_SCREENSHOT",
+      "category": "APP_SCREENSHOTS_AND_PREVIEWS",
+      "placementGroup": null,
+      "formats": [".png", ".jpg", ".jpeg"],
+      "alphaAllowed": false,
+      "v1": true
+    },
+    "iphone-duo-1398x2034": {
+      "label": "iPhone Duo — outer display (required Apr 2027)",
+      "width": 1398, "height": 2034, "cssWidth": 699, "cssHeight": 1017,
+      "placementType": "APP_SCREENSHOT",
+      "category": "APP_SCREENSHOTS_AND_PREVIEWS",
+      "placementGroup": null,
+      "formats": [".png", ".jpg", ".jpeg"],
+      "alphaAllowed": false,
+      "v1": false
+    },
+    "iphone-duo-2007x2853": {
+      "label": "iPhone Duo — inner display (required Apr 2027)",
+      "width": 2007, "height": 2853, "cssWidth": 1003.5, "cssHeight": 1426.5,
+      "placementType": "APP_SCREENSHOT",
+      "category": "APP_SCREENSHOTS_AND_PREVIEWS",
+      "placementGroup": null,
+      "formats": [".png", ".jpg", ".jpeg"],
+      "alphaAllowed": false,
+      "v1": false
+    },
+    "header-3840x1646": {
+      "label": "Product page header — 21:9",
+      "width": 3840, "height": 1646, "cssWidth": 1920, "cssHeight": 823,
+      "placementType": "PRODUCT_PAGE_HEADER_ASSET",
+      "category": "CREATIVE_ASSETS",
+      "placementGroup": null,
+      "formats": [".png", ".jpg", ".jpeg"],
+      "alphaAllowed": false,
+      "safeArea": { "x": 1097, "y": 493, "width": 1646, "height": 661 },
+      "v1": true
+    },
+    "creative-5244x2950": {
+      "label": "Universal creative asset — 16:9 PNG",
+      "width": 5244, "height": 2950, "cssWidth": 2622, "cssHeight": 1475,
+      "placementType": "PRODUCT_PAGE_HEADER_ASSET_OR_APP_STORE_SEARCH_RESULTS_ASSET",
+      "category": "CREATIVE_ASSETS",
+      "placementGroup": null,
+      "formats": [".png"],
+      "alphaAllowed": false,
+      "v1": false
+    },
+    "search-3840x2560": {
+      "label": "Search results creative — 3:2",
+      "width": 3840, "height": 2560, "cssWidth": 1920, "cssHeight": 1280,
+      "placementType": "APP_STORE_SEARCH_RESULTS_ASSET",
+      "category": "CREATIVE_ASSETS",
+      "placementGroup": null,
+      "formats": [".png", ".jpg", ".jpeg"],
+      "alphaAllowed": false,
+      "safeArea": { "x": 836, "y": 765, "width": 2168, "height": 1030 },
+      "v1": true
+    },
+    "event-card-3840x2160": {
+      "label": "In-App Event card — 16:9",
+      "width": 3840, "height": 2160, "cssWidth": 1920, "cssHeight": 1080,
+      "placementType": "EVENT_CARD_ASSET",
+      "category": "CREATIVE_ASSETS",
+      "placementGroup": null,
+      "formats": [".png", ".jpg", ".jpeg"],
+      "alphaAllowed": false,
+      "v1": true
+    },
+    "event-detail-2160x3840": {
+      "label": "In-App Event details page — 9:16",
+      "width": 2160, "height": 3840, "cssWidth": 1080, "cssHeight": 1920,
+      "placementType": null,
+      "category": "CREATIVE_ASSETS",
+      "placementGroup": null,
+      "formats": [".png", ".jpg", ".jpeg"],
+      "alphaAllowed": false,
+      "v1": true
+    },
+    "mac-2880x1800": {
+      "label": "Mac — 16:10",
+      "width": 2880, "height": 1800, "cssWidth": 1440, "cssHeight": 900,
+      "placementType": "APP_SCREENSHOT",
+      "category": "APP_SCREENSHOTS_AND_PREVIEWS",
+      "placementGroup": "MAC_PROFILE",
+      "formats": [".png", ".jpg", ".jpeg"],
+      "alphaAllowed": false,
+      "v1": false
+    },
+    "tv-1920x1080": {
+      "label": "Apple TV",
+      "width": 1920, "height": 1080, "cssWidth": 960, "cssHeight": 540,
+      "placementType": "APP_SCREENSHOT",
+      "category": "APP_SCREENSHOTS_AND_PREVIEWS",
+      "placementGroup": null,
+      "formats": [".png", ".jpg", ".jpeg"],
+      "alphaAllowed": false,
+      "v1": false
+    },
+    "vision-3840x2160": {
+      "label": "Apple Vision Pro",
+      "width": 3840, "height": 2160, "cssWidth": 1920, "cssHeight": 1080,
+      "placementType": "APP_SCREENSHOT",
+      "category": "APP_SCREENSHOTS_AND_PREVIEWS",
+      "placementGroup": null,
+      "formats": [".png", ".jpg", ".jpeg"],
+      "alphaAllowed": false,
+      "v1": false
+    }
+  },
+  "placementTypes": {
+    "APP_SCREENSHOT": { "category": "APP_SCREENSHOTS_AND_PREVIEWS", "orderable": true, "documented": true },
+    "APP_PREVIEW": { "category": "APP_SCREENSHOTS_AND_PREVIEWS", "orderable": true, "documented": true, "v1": false },
+    "PRODUCT_PAGE_HEADER_ASSET": { "category": "CREATIVE_ASSETS", "orderable": false, "documented": true },
+    "APP_STORE_SEARCH_RESULTS_ASSET": { "category": "CREATIVE_ASSETS", "orderable": false, "documented": true },
+    "EVENT_CARD_ASSET": { "category": "CREATIVE_ASSETS", "orderable": false, "documented": true },
+    "EVENT_DETAIL_ASSET": { "category": "CREATIVE_ASSETS", "orderable": false, "documented": false, "note": "exact id must be read from ref data" }
+  },
+  "documentedGroups": [
+    "IPHONE_DYNAMIC_ISLAND_LARGE_PROFILE",
+    "MAC_PROFILE",
+    "IMESSAGE_IPHONE_DYNAMIC_ISLAND_LARGE_PROFILE"
+  ]
+}

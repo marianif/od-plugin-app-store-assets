@@ -1,0 +1,132 @@
+{
+  "version": 1,
+  "app": "Trackly",
+  "locale": "en-US",
+  "ascAppId": "",
+  "versionString": "",
+  "theme": {
+    "bg": "#F4EFE6",
+    "ink": "#0F2A22",
+    "accent": "#206956",
+    "muted": "#5A6B64",
+    "panel": "#E9F4EF"
+  },
+  "assets": [
+    {
+      "id": "shot-01",
+      "kind": "screenshot",
+      "spec": "iphone-1320x2868",
+      "file": "store/en-US/iphone-1320x2868/01.png",
+      "html": "store/en-US/iphone-1320x2868/01.html",
+      "copy": {
+        "brand": "TRACKLY",
+        "headline": "Know exactly what you can spend.",
+        "subline": "A monthly limit that updates as you go."
+      },
+      "order": 1,
+      "placementType": "APP_SCREENSHOT",
+      "placementGroup": "IPHONE_DYNAMIC_ISLAND_LARGE_PROFILE"
+    },
+    {
+      "id": "shot-02",
+      "kind": "screenshot",
+      "spec": "iphone-1320x2868",
+      "file": "store/en-US/iphone-1320x2868/02.png",
+      "html": "store/en-US/iphone-1320x2868/02.html",
+      "copy": {
+        "brand": "TRACKLY",
+        "headline": "See where the month actually went.",
+        "subline": "Patterns show the real story, not just the total."
+      },
+      "order": 2,
+      "placementType": "APP_SCREENSHOT",
+      "placementGroup": "IPHONE_DYNAMIC_ISLAND_LARGE_PROFILE"
+    },
+    {
+      "id": "shot-03",
+      "kind": "screenshot",
+      "spec": "iphone-1320x2868",
+      "file": "store/en-US/iphone-1320x2868/03.png",
+      "html": "store/en-US/iphone-1320x2868/03.html",
+      "copy": {
+        "brand": "TRACKLY",
+        "headline": "Categories that keep history clean.",
+        "subline": "Six built-ins. Add your own when you need to."
+      },
+      "order": 3,
+      "placementType": "APP_SCREENSHOT",
+      "placementGroup": "IPHONE_DYNAMIC_ISLAND_LARGE_PROFILE"
+    },
+    {
+      "id": "shot-04",
+      "kind": "screenshot",
+      "spec": "iphone-1320x2868",
+      "file": "store/en-US/iphone-1320x2868/04.png",
+      "html": "store/en-US/iphone-1320x2868/04.html",
+      "copy": {
+        "brand": "TRACKLY",
+        "headline": "Every subscription, one place.",
+        "subline": "Know what is committed before the month starts."
+      },
+      "order": 4,
+      "placementType": "APP_SCREENSHOT",
+      "placementGroup": "IPHONE_DYNAMIC_ISLAND_LARGE_PROFILE"
+    },
+    {
+      "id": "header-01",
+      "kind": "header",
+      "spec": "header-3840x1646",
+      "file": "store/en-US/header-3840x1646/01.png",
+      "html": "store/en-US/header-3840x1646/01.html",
+      "copy": {
+        "name": "Trackly",
+        "mark": "T",
+        "tagline": "Your money, in focus."
+      },
+      "placementType": "PRODUCT_PAGE_HEADER_ASSET",
+      "placementGroup": null
+    },
+    {
+      "id": "search-01",
+      "kind": "search",
+      "spec": "search-3840x2560",
+      "file": "store/en-US/search-3840x2560/01.png",
+      "html": "store/en-US/search-3840x2560/01.html",
+      "copy": {
+        "kicker": "TRACKLY",
+        "hook": "Know what you can spend.",
+        "subhook": "A monthly limit that updates as you go."
+      },
+      "placementType": "APP_STORE_SEARCH_RESULTS_ASSET",
+      "placementGroup": null
+    },
+    {
+      "id": "event-card-01",
+      "kind": "event-card",
+      "spec": "event-card-3840x2160",
+      "file": "store/en-US/event-card-3840x2160/01.png",
+      "html": "store/en-US/event-card-3840x2160/01.html",
+      "copy": {
+        "kicker": "IN-APP EVENT",
+        "title": "January Leaderboard Climb",
+        "sub": "Join the challenge · Jan 12–19"
+      },
+      "placementType": "EVENT_CARD_ASSET",
+      "placementGroup": null
+    },
+    {
+      "id": "event-detail-01",
+      "kind": "event-detail",
+      "spec": "event-detail-2160x3840",
+      "file": "store/en-US/event-detail-2160x3840/01.png",
+      "html": "store/en-US/event-detail-2160x3840/01.html",
+      "copy": {
+        "kicker": "IN-APP EVENT",
+        "title": "New season, new patterns",
+        "sub": "A fresh look at the month."
+      },
+      "placementType": null,
+      "placementGroup": null
+    }
+  ]
+}

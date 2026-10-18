@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>App Store screenshot</title>
+<style>
+  :root {
+    --u: calc(100vw / 660);
+    --headline-size: {{HEADLINE_SIZE}};
+    --bg: #f4efe6;
+    --ink: #0f2a22;
+    --accent: #206956;
+    --muted: #5a6b64;
+    --panel: #e9f4ef;
+    --cream: #f4efe6;
+    {{THEME}}
+    --pad-x: calc(64 * var(--u));
+    --pad-top: calc(70 * var(--u));
+    --pad-bottom: calc(40 * var(--u));
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  .canvas {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--pad-top) var(--pad-x) var(--pad-bottom);
+    background: var(--bg);
+    isolation: isolate;
+  }
+  .canvas::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    width: calc(560 * var(--u));
+    height: calc(560 * var(--u));
+    right: calc(-190 * var(--u));
+    top: calc(120 * var(--u));
+    border-radius: 50%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--accent) 14%, transparent) 0%, transparent 68%);
+    pointer-events: none;
+  }
+  .copy { display: flex; flex-direction: column; align-items: center; width: 100%; }
+  .eyebrow {
+    font-size: calc(15 * var(--u));
+    font-weight: 650;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: calc(20 * var(--u));
+  }
+  .headline {
+    font-size: calc(var(--headline-size) * var(--u));
+    line-height: 1.02;
+    letter-spacing: -.035em;
+    font-weight: 750;
+    text-align: center;
+    text-wrap: balance;
+    max-width: calc(548 * var(--u));
+    max-height: calc(268 * var(--u));
+    overflow: hidden;
+  }
+  .subline {
+    font-size: calc(22 * var(--u));
+    line-height: 1.32;
+    color: var(--muted);
+    text-align: center;
+    max-width: calc(500 * var(--u));
+    margin-top: calc(22 * var(--u));
+    text-wrap: balance;
+  }
+  .device-wrap {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    width: 100%;
+    margin-top: calc(24 * var(--u));
+  }
+  .device {
+    position: relative;
+    width: calc(500 * var(--u));
+    height: calc(1047 * var(--u));
+    border-radius: calc(79 * var(--u));
+    background: #0b1f19;
+    padding: calc(15 * var(--u));
+    box-shadow:
+      0 calc(34 * var(--u)) calc(64 * var(--u)) rgba(15, 42, 34, .24),
+      0 calc(6 * var(--u)) calc(14 * var(--u)) rgba(15, 42, 34, .16);
+  }
+  .device::before,
+  .device::after {
+    content: "";
+    position: absolute;
+    width: calc(3 * var(--u));
+    background: #0b1f19;
+    opacity: .55;
+  }
+  .device::before { left: calc(-2 * var(--u)); top: calc(150 * var(--u)); height: calc(44 * var(--u)); border-radius: calc(2 * var(--u)); }
+  .device::after  { right: calc(-2 * var(--u)); top: calc(196 * var(--u)); height: calc(70 * var(--u)); border-radius: calc(2 * var(--u)); }
+  .screen {
+    width: 100%;
+    height: 100%;
+    border-radius: calc(64 * var(--u));
+    overflow: hidden;
+    background: var(--panel);
+    display: grid;
+    place-items: center;
+  }
+  .screen img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .screen .ph { color: var(--muted); font-size: calc(18 * var(--u)); }
+  .quiet .copy { display: none; }
+  .quiet .device { width: calc(500 * var(--u)); height: calc(1047 * var(--u)); }
+  .quiet .device-wrap { margin-top: 0; }
+  .layout-bottom .copy { order: 2; }
+  .layout-bottom .device-wrap { order: 1; margin-top: 0; }
+  .layout-bottom .headline { max-height: calc(196 * var(--u)); }
+</style>
+</head>
+<body>
+<div class="canvas {{LAYOUT_CLASS}}">
+  <div class="copy">
+    <div class="eyebrow">{{BRAND}}</div>
+    <h1 class="headline">{{HEADLINE}}</h1>
+    {{SUBLINE_BLOCK}}
+  </div>
+  <div class="device-wrap">
+    <div class="device"><div class="screen">{{SHOT_BLOCK}}</div></div>
+  </div>
+</div>
+</body>
+</html>

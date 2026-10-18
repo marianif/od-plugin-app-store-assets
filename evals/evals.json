@@ -1,0 +1,65 @@
+{
+  "skill_name": "app-store-assets",
+  "evals": [
+    {
+      "id": "screenshot-set-en",
+      "prompt": "Generate a 5-screenshot en-US App Store set for a finance app from these captures, iPhone 6.9-inch, warm cream and deep green brand. Validate it.",
+      "expected_output": "Five 1320×2868 opaque PNGs, each with an editable HTML source, a plan with orders 1-5, and a PASS validation report with no P0 findings.",
+      "assertions": [
+        "Every PNG is exactly 1320x2868 and has no alpha channel",
+        "Each screenshot has a short headline and uses the real supplied capture",
+        "asset-plan.json lists orders 1..5 and the APP_SCREENSHOT placement type",
+        "validation-report.md says PASS with 0 P0"
+      ]
+    },
+    {
+      "id": "price-claim-blocked",
+      "prompt": "Use the headline 'Save $4.99/month — try it free' on the first screenshot.",
+      "expected_output": "The composer writes the copy but the validator fails with a P0 price-claim finding and refuses to upload.",
+      "assertions": [
+        "validation-report.md contains a P0 price-claim finding",
+        "validate.mjs exits with code 1",
+        "asc-upload.mjs upload stops before any reservation"
+      ]
+    },
+    {
+      "id": "wrong-dimensions",
+      "prompt": "Render the iPhone screenshot at 1179x2556 but declare spec iphone-1320x2868.",
+      "expected_output": "render.mjs or the validator reports the pixel mismatch and upload is blocked.",
+      "assertions": [
+        "The mismatch is reported as a P0",
+        "No App Store Connect reservation is created"
+      ]
+    },
+    {
+      "id": "search-scale-check",
+      "prompt": "Create a search results asset for a habit tracker with the hook 'Build the streak you keep' and a tilted phone.",
+      "expected_output": "A 3840×2560 opaque PNG with the hook and phone inside the 3:2 safe area, plus a note confirming the 10%-width legibility check.",
+      "assertions": [
+        "The output is exactly 3840x2560",
+        "The hook is at most 4 words",
+        "The report mentions the 384px preview check"
+      ]
+    },
+    {
+      "id": "upload-dry-run-no-credentials",
+      "prompt": "Upload the validated plan to App Store Connect.",
+      "expected_output": "The uploader performs a local dry-run, reports that ASC credentials are missing, and does not mutate anything.",
+      "assertions": [
+        "asc-upload.mjs prints dryRun: true",
+        "The output names ASC_ISSUER_ID, ASC_KEY_ID and ASC_PRIVATE_KEY_PATH or the config file",
+        "--execute is required and fails without credentials"
+      ]
+    },
+    {
+      "id": "event-media",
+      "prompt": "Generate In-App Event card and detail media for a reading app's 'Spring Reading Challenge', with a badge-safe top-left.",
+      "expected_output": "A 3840×2160 card and a 2160×3840 detail image, both opaque, with no drawn badge and the top-left zone clear.",
+      "assertions": [
+        "Both files match their exact specs",
+        "No badge artwork is rendered",
+        "The plan keeps the badge-safe zone free of copy"
+      ]
+    }
+  ]
+}

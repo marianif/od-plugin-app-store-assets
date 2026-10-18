@@ -1,0 +1,24 @@
+{
+  "skill_name": "app-store-assets",
+  "queries": [
+    "Create App Store screenshots for my app",
+    "I need a product page header image for the App Store",
+    "Make a search results creative asset for iOS 27",
+    "Generate in-app event card and detail media",
+    "Upload my screenshots to App Store Connect",
+    "Check if my App Store assets follow Apple's guidelines",
+    "I need 1320x2868 screenshots with captions",
+    "Prepare App Store artwork for a new app version",
+    "Localize my App Store screenshots to Italian",
+    "Build me a full App Store asset set from these captures"
+  ],
+  "non_queries": [
+    "Write a blog post about my app",
+    "Design a landing page for my SaaS",
+    "Create a pitch deck",
+    "Fix a bug in my React app",
+    "Generate a logo",
+    "Write App Store metadata copy",
+    "Set up RevenueCat products"
+  ]
+}
