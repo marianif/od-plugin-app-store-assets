@@ -174,14 +174,26 @@ function tokensFor(kind, data, outPath) {
 
   if (kind === 'watch') {
     const facesLayout = data.layout === 'faces';
+    const duoLayout = data.layout === 'duo';
     const screen = data.screen ? relativeShot(outPath, data.screen) : '';
-    const watchBlock = facesLayout || !screen
-      ? ''
-      : `<div class="watch">
-      <div class="screen"><img src="${esc(screen)}" alt=""></div>
+    const watchCase = (src, extraClass = '') => (src
+      ? `<div class="watch ${extraClass}">
+      <div class="screen"><img src="${esc(src)}" alt=""></div>
       <div class="crown"></div>
       <div class="sidebtn"></div>
+    </div>`
+      : '');
+    let watchBlock = '';
+    if (!facesLayout) {
+      if (duoLayout) {
+        const screens = Array.isArray(data.screens) ? data.screens : [];
+        watchBlock = `<div class="watch-row">
+      ${screens.slice(0, 2).map((value, index) => watchCase(relativeShot(outPath, value), index === 0 ? 'w1' : 'w2')).join('\n      ')}
     </div>`;
+      } else {
+        watchBlock = watchCase(screen);
+      }
+    }
     const faces = data.faces || {};
     const facesBlock = facesLayout
       ? ['circular', 'rectangular', 'corner']
@@ -192,6 +204,7 @@ function tokensFor(kind, data, outPath) {
     return {
       HEADLINE_SIZE: String(fitSize(data.headline, HEADLINE_STEPS, 42)),
       THEME: themeDeclarations(data.theme),
+      LAYOUT_CLASS: facesLayout ? 'layout-faces' : duoLayout ? 'layout-duo' : 'layout-app',
       BRAND: esc(data.brand || ''),
       HEADLINE: esc(data.headline || ''),
       SUBLINE_BLOCK: data.subline ? `<p class="subline">${esc(data.subline)}</p>` : '',

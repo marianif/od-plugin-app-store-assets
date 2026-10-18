@@ -71,6 +71,7 @@
   }
   /* App layout */
   .watch {
+    flex: 0 0 auto;
     position: relative;
     width: calc(482 * var(--u));
     height: calc(574 * var(--u));
@@ -108,10 +109,20 @@
   /* Faces layout */
   .faces { width: 100%; display: flex; flex-direction: column; gap: calc(18 * var(--u)); }
   .faces img { display: block; width: 100%; border-radius: calc(46 * var(--u)); box-shadow: 0 calc(28 * var(--u)) calc(54 * var(--u)) rgba(0, 0, 0, .42); }
+
+  /* Duo layout: two watch states side by side */
+  .layout-duo.canvas { gap: calc(46 * var(--u)); padding-left: calc(30 * var(--u)); padding-right: calc(30 * var(--u)); }
+  .watch-row { display: flex; align-items: center; justify-content: center; gap: calc(16 * var(--u)); width: 100%; }
+  .layout-duo .watch { flex: 0 0 auto; width: calc(292 * var(--u)); height: calc(344 * var(--u)); border-radius: calc(72 * var(--u)); padding: calc(10 * var(--u)); }
+  .layout-duo .watch .screen { border-radius: calc(62 * var(--u)); }
+  .layout-duo .watch.w1 { transform: translateY(calc(-18 * var(--u))); }
+  .layout-duo .watch.w2 { transform: translateY(calc(18 * var(--u))); }
+  .layout-duo .watch .crown { right: calc(-7 * var(--u)); top: calc(108 * var(--u)); width: calc(12 * var(--u)); height: calc(48 * var(--u)); }
+  .layout-duo .watch .sidebtn { right: calc(-5 * var(--u)); top: calc(172 * var(--u)); width: calc(8 * var(--u)); height: calc(64 * var(--u)); }
 </style>
 </head>
 <body>
-<div class="canvas">
+<div class="canvas {{LAYOUT_CLASS}}">
   <div class="copy">
     <div class="eyebrow">{{BRAND}}</div>
     <h1 class="headline">{{HEADLINE}}</h1>
