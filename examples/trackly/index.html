@@ -26,6 +26,7 @@
   .sub { color: var(--muted); font-size: 14px; margin-top: 8px; }
   .shots { display: flex; gap: 20px; margin-top: 30px; overflow-x: auto; padding-bottom: 8px; }
   .shots img { width: 232px; border-radius: 26px; box-shadow: 0 24px 50px rgba(15,42,34,.18); flex: 0 0 auto; }
+  .watchshots img { width: 190px; border-radius: 32px; background: #000; }
   .wide { display: grid; grid-template-columns: 1fr; gap: 20px; margin-top: 30px; }
   .wide img { width: 100%; border-radius: 18px; box-shadow: 0 22px 46px rgba(15,42,34,.16); display: block; }
   .pair { display: grid; grid-template-columns: 1.9fr 1fr; gap: 20px; margin-top: 30px; }
@@ -48,9 +49,9 @@
     <h1>Trackly, ready for the App Store.</h1>
     <p class="lead">
       A real set produced by the App Store Assets plugin: eight iPhone 6.9" screenshots
-      — including smart capture, widgets and the Apple Watch features — plus a
-      product-page header, search creative and In-App Event media, all rendered at
-      Apple's exact pixels from the app's own captures and design sources.
+      — including smart capture, widgets and the Apple Watch features — three watchOS
+      screenshots, plus a product-page header, search creative and In-App Event media,
+      all rendered at Apple's exact pixels from the app's own captures and design sources.
     </p>
     <div class="meta">
       <span><b>App</b> Trackly — expense tracker</span>
@@ -58,7 +59,7 @@
       <span><b>Device</b> iPhone 1320×2868</span>
       <span><b>Renderer</b> OpenDesign desktop export (2× CSS)</span>
     </div>
-    <div class="pass">✓ Validation PASS · 12 assets · P0 0 · P1 0 · P2 1</div>
+    <div class="pass">✓ Validation PASS · 15 assets · P0 0 · P1 0 · P2 1</div>
   </header>
 
   <section class="wrap">
@@ -73,6 +74,16 @@
       <img src="06.png" alt="See where the month actually went.">
       <img src="07.png" alt="Categories that keep history clean.">
       <img src="08.png" alt="Every subscription, one place.">
+    </div>
+  </section>
+
+  <section class="wrap">
+    <h2>Watch app screenshots (watchOS)</h2>
+    <p class="sub">The Watch app needs its own set at 416×496 — captured directly from the Watch screen recording, same size across localizations.</p>
+    <div class="shots watchshots">
+      <img src="watch/01.png" alt="Tap to record">
+      <img src="watch/02.png" alt="Listening">
+      <img src="watch/03.png" alt="Saved, auto-categorized as Dining">
     </div>
   </section>
 
@@ -115,6 +126,9 @@
         <tr><td>shot-06</td><td>screenshot</td><td><code>iphone-1320x2868</code></td><td>1320×2868</td><td>APP_SCREENSHOT</td><td>6</td></tr>
         <tr><td>shot-07</td><td>screenshot</td><td><code>iphone-1320x2868</code></td><td>1320×2868</td><td>APP_SCREENSHOT</td><td>7</td></tr>
         <tr><td>shot-08</td><td>screenshot</td><td><code>iphone-1320x2868</code></td><td>1320×2868</td><td>APP_SCREENSHOT</td><td>8</td></tr>
+        <tr><td>watch-01</td><td>screenshot · watchOS</td><td><code>watch-416x496</code></td><td>416×496</td><td>APP_SCREENSHOT (WATCHOS)</td><td>1</td></tr>
+        <tr><td>watch-02</td><td>screenshot · watchOS</td><td><code>watch-416x496</code></td><td>416×496</td><td>APP_SCREENSHOT (WATCHOS)</td><td>2</td></tr>
+        <tr><td>watch-03</td><td>screenshot · watchOS</td><td><code>watch-416x496</code></td><td>416×496</td><td>APP_SCREENSHOT (WATCHOS)</td><td>3</td></tr>
         <tr><td>header-01</td><td>header</td><td><code>header-3840x1646</code></td><td>3840×1646</td><td>PRODUCT_PAGE_HEADER_ASSET</td><td>—</td></tr>
         <tr><td>search-01</td><td>search</td><td><code>search-3840x2560</code></td><td>3840×2560</td><td>APP_STORE_SEARCH_RESULTS_ASSET</td><td>—</td></tr>
         <tr><td>event-card-01</td><td>event-card</td><td><code>event-card-3840x2160</code></td><td>3840×2160</td><td>EVENT_CARD_ASSET</td><td>—</td></tr>

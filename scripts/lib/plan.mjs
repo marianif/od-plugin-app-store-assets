@@ -6,7 +6,7 @@ import { inspectImage, assertSpecMatch } from './image.mjs';
 import { getSpec } from './specs.mjs';
 
 const KIND_SPEC_PREFIX = {
-  screenshot: ['iphone-', 'ipad-', 'mac-', 'tv-', 'vision-'],
+  screenshot: ['iphone-', 'ipad-', 'mac-', 'tv-', 'vision-', 'watch-'],
   header: ['header-', 'creative-'],
   search: ['search-', 'creative-'],
   'event-card': ['event-card-'],

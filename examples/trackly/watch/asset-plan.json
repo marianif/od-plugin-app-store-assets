@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "app": "Trackly",
+  "locale": "en-US",
+  "ascAppId": "",
+  "versionString": "",
+  "platform": "WATCHOS",
+  "assets": [
+    { "id": "watch-01", "kind": "screenshot", "spec": "watch-416x496", "file": "store/en-US/watch-416x496/01.png", "copy": {}, "order": 1, "placementType": "APP_SCREENSHOT", "placementGroup": null },
+    { "id": "watch-02", "kind": "screenshot", "spec": "watch-416x496", "file": "store/en-US/watch-416x496/02.png", "copy": {}, "order": 2, "placementType": "APP_SCREENSHOT", "placementGroup": null },
+    { "id": "watch-03", "kind": "screenshot", "spec": "watch-416x496", "file": "store/en-US/watch-416x496/03.png", "copy": {}, "order": 3, "placementType": "APP_SCREENSHOT", "placementGroup": null }
+  ]
+}
