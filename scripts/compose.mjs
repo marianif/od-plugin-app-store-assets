@@ -150,6 +150,56 @@ function tokensFor(kind, data, outPath) {
     };
   }
 
+  if (kind === 'widgets') {
+    const widgets = data.widgets || {};
+    const widgetImg = (value, cls) => (value
+      ? `<img class="${cls}" src="${esc(relativeShot(outPath, value))}" alt="">`
+      : '');
+    const rows = [
+      widgetImg(widgets.medium, 'w'),
+      (widgets.small || widgets.voice)
+        ? `<div class="wrow">${widgetImg(widgets.small, 'half')}${widgetImg(widgets.voice, 'half')}</div>`
+        : '',
+      widgetImg(widgets.recent, 'w'),
+    ].filter(Boolean);
+    return {
+      HEADLINE_SIZE: String(fitSize(data.headline, HEADLINE_STEPS, 42)),
+      THEME: themeDeclarations(data.theme),
+      BRAND: esc(data.brand || ''),
+      HEADLINE: esc(data.headline || ''),
+      SUBLINE_BLOCK: data.subline ? `<p class="subline">${esc(data.subline)}</p>` : '',
+      WIDGETS_BLOCK: rows.join('\n    '),
+    };
+  }
+
+  if (kind === 'watch') {
+    const facesLayout = data.layout === 'faces';
+    const screen = data.screen ? relativeShot(outPath, data.screen) : '';
+    const watchBlock = facesLayout || !screen
+      ? ''
+      : `<div class="watch">
+      <div class="screen"><img src="${esc(screen)}" alt=""></div>
+      <div class="crown"></div>
+      <div class="sidebtn"></div>
+    </div>`;
+    const faces = data.faces || {};
+    const facesBlock = facesLayout
+      ? ['circular', 'rectangular', 'corner']
+        .map((key) => (faces[key] ? `<img src="${esc(relativeShot(outPath, faces[key]))}" alt="">` : ''))
+        .filter(Boolean)
+        .join('\n      ')
+      : '';
+    return {
+      HEADLINE_SIZE: String(fitSize(data.headline, HEADLINE_STEPS, 42)),
+      THEME: themeDeclarations(data.theme),
+      BRAND: esc(data.brand || ''),
+      HEADLINE: esc(data.headline || ''),
+      SUBLINE_BLOCK: data.subline ? `<p class="subline">${esc(data.subline)}</p>` : '',
+      WATCH_BLOCK: watchBlock,
+      FACES_BLOCK: facesBlock,
+    };
+  }
+
   return { THEME: themeDeclarations(data.theme) };
 }
 
@@ -183,8 +233,8 @@ async function main() {
 
   const templatePath = await resolveTemplate(flags.template);
   const kind = path.basename(templatePath, '.html');
-  if (!['screenshot', 'header', 'search', 'event-card', 'event-detail'].includes(kind)) {
-    fail(`unknown canvas "${kind}". Expected screenshot, header, search, event-card or event-detail.`);
+  if (!['screenshot', 'header', 'search', 'event-card', 'event-detail', 'widgets', 'watch'].includes(kind)) {
+    fail(`unknown canvas "${kind}". Expected screenshot, header, search, event-card, event-detail, widgets or watch.`);
   }
 
   let data = {};

@@ -156,6 +156,8 @@ Data fields per canvas:
 | Canvas | Fields |
 | --- | --- |
 | `screenshot.html` | `brand`, `headline`, `subline`, `shot`, `layout` (`top`/`bottom`/`quiet`), `theme` |
+| `widgets.html` | `brand`, `headline`, `subline`, `widgets` (`medium`, `small`, `voice`, `recent` paths), `theme` |
+| `watch.html` | `layout` (`app`/`faces`), `headline`, `subline`, `screen` (app layout) or `faces` (`circular`, `rectangular`, `corner`), `theme` |
 | `header.html` | `name`, `mark` (1–2 letters) or `markImage`, `tagline` (optional), `theme` |
 | `search.html` | `kicker`, `hook` (2–4 words), `subhook`, `shot`, `theme` |
 | `event-card.html` | `kicker`, `title`, `sub` (optional), `shot` (optional), `theme` |
@@ -166,6 +168,11 @@ Canvas rules:
 - Screenshot: 2–6 word headline, max 3 lines, auto-fitted; the device frame is
   drawn in CSS and the capture is placed inside. Use `layout: "bottom"` for
   variety, `"quiet"` for a text-free hero shot.
+- Widgets: a light panel on a dark backdrop; pass the real widget renders in
+  `widgets`. The panel background must match the widget render background
+  (#f8f7f3 by default) so the cards blend.
+- Watch: a CSS watch case around a real Watch frame; `layout: "faces"` swaps to
+  the complication crops. Use frames extracted from a Watch screen recording.
 - Header: text-free by default. One clear idea, no phone repeating the
   screenshots below. Keep the mark + name inside the safe box.
 - Search: one big tilted phone + a huge hook. The hook must still read when the

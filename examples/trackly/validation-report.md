@@ -2,7 +2,7 @@
 
 - App: **Trackly**
 - Locale: **en-US**
-- Assets: **8**
+- Assets: **12**
 - Blockers (P0): **0** · Warnings (P1): **0** · Notes (P2): **1**
 
 **Result: PASS** — no mechanical blockers. Human review still required for Apple policy.
@@ -15,10 +15,14 @@
 | 2 | shot-02 | screenshot | iphone-1320x2868 | store/en-US/iphone-1320x2868/02.png | 1320×2868 | no | ok |
 | 3 | shot-03 | screenshot | iphone-1320x2868 | store/en-US/iphone-1320x2868/03.png | 1320×2868 | no | ok |
 | 4 | shot-04 | screenshot | iphone-1320x2868 | store/en-US/iphone-1320x2868/04.png | 1320×2868 | no | ok |
-| 5 | header-01 | header | header-3840x1646 | store/en-US/header-3840x1646/01.png | 3840×1646 | no | ok |
-| 6 | search-01 | search | search-3840x2560 | store/en-US/search-3840x2560/01.png | 3840×2560 | no | ok |
-| 7 | event-card-01 | event-card | event-card-3840x2160 | store/en-US/event-card-3840x2160/01.png | 3840×2160 | no | ok |
-| 8 | event-detail-01 | event-detail | event-detail-2160x3840 | store/en-US/event-detail-2160x3840/01.png | 2160×3840 | no | ok |
+| 5 | shot-05 | screenshot | iphone-1320x2868 | store/en-US/iphone-1320x2868/05.png | 1320×2868 | no | ok |
+| 6 | shot-06 | screenshot | iphone-1320x2868 | store/en-US/iphone-1320x2868/06.png | 1320×2868 | no | ok |
+| 7 | shot-07 | screenshot | iphone-1320x2868 | store/en-US/iphone-1320x2868/07.png | 1320×2868 | no | ok |
+| 8 | shot-08 | screenshot | iphone-1320x2868 | store/en-US/iphone-1320x2868/08.png | 1320×2868 | no | ok |
+| 9 | header-01 | header | header-3840x1646 | store/en-US/header-3840x1646/01.png | 3840×1646 | no | ok |
+| 10 | search-01 | search | search-3840x2560 | store/en-US/search-3840x2560/01.png | 3840×2560 | no | ok |
+| 11 | event-card-01 | event-card | event-card-3840x2160 | store/en-US/event-card-3840x2160/01.png | 3840×2160 | no | ok |
+| 12 | event-detail-01 | event-detail | event-detail-2160x3840 | store/en-US/event-detail-2160x3840/01.png | 2160×3840 | no | ok |
 
 ## Findings
 

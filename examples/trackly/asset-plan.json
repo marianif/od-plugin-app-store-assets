@@ -18,11 +18,7 @@
       "spec": "iphone-1320x2868",
       "file": "store/en-US/iphone-1320x2868/01.png",
       "html": "store/en-US/iphone-1320x2868/01.html",
-      "copy": {
-        "brand": "TRACKLY",
-        "headline": "Know exactly what you can spend.",
-        "subline": "A monthly limit that updates as you go."
-      },
+      "copy": { "brand": "TRACKLY", "headline": "Know exactly what you can spend.", "subline": "A monthly limit that updates as you go." },
       "order": 1,
       "placementType": "APP_SCREENSHOT",
       "placementGroup": "IPHONE_DYNAMIC_ISLAND_LARGE_PROFILE"
@@ -33,11 +29,7 @@
       "spec": "iphone-1320x2868",
       "file": "store/en-US/iphone-1320x2868/02.png",
       "html": "store/en-US/iphone-1320x2868/02.html",
-      "copy": {
-        "brand": "TRACKLY",
-        "headline": "See where the month actually went.",
-        "subline": "Patterns show the real story, not just the total."
-      },
+      "copy": { "brand": "TRACKLY", "headline": "Say it once. It files itself.", "subline": "Describe the spend, Trackly picks the amount and the category." },
       "order": 2,
       "placementType": "APP_SCREENSHOT",
       "placementGroup": "IPHONE_DYNAMIC_ISLAND_LARGE_PROFILE"
@@ -48,11 +40,7 @@
       "spec": "iphone-1320x2868",
       "file": "store/en-US/iphone-1320x2868/03.png",
       "html": "store/en-US/iphone-1320x2868/03.html",
-      "copy": {
-        "brand": "TRACKLY",
-        "headline": "Categories that keep history clean.",
-        "subline": "Six built-ins. Add your own when you need to."
-      },
+      "copy": { "brand": "TRACKLY", "headline": "Your limit, on your Home Screen.", "subline": "Small, medium or live — the same answer, one glance away." },
       "order": 3,
       "placementType": "APP_SCREENSHOT",
       "placementGroup": "IPHONE_DYNAMIC_ISLAND_LARGE_PROFILE"
@@ -63,70 +51,78 @@
       "spec": "iphone-1320x2868",
       "file": "store/en-US/iphone-1320x2868/04.png",
       "html": "store/en-US/iphone-1320x2868/04.html",
-      "copy": {
-        "brand": "TRACKLY",
-        "headline": "Every subscription, one place.",
-        "subline": "Know what is committed before the month starts."
-      },
+      "copy": { "brand": "TRACKLY", "headline": "Log it from your wrist.", "subline": "Tap, say it, done — the phone stays in your pocket." },
       "order": 4,
       "placementType": "APP_SCREENSHOT",
       "placementGroup": "IPHONE_DYNAMIC_ISLAND_LARGE_PROFILE"
     },
     {
-      "id": "header-01",
-      "kind": "header",
-      "spec": "header-3840x1646",
-      "file": "store/en-US/header-3840x1646/01.png",
-      "html": "store/en-US/header-3840x1646/01.html",
-      "copy": {
-        "name": "Trackly",
-        "mark": "T",
-        "tagline": "Your money, in focus."
-      },
-      "placementType": "PRODUCT_PAGE_HEADER_ASSET",
-      "placementGroup": null
+      "id": "shot-05",
+      "kind": "screenshot",
+      "spec": "iphone-1320x2868",
+      "file": "store/en-US/iphone-1320x2868/05.png",
+      "html": "store/en-US/iphone-1320x2868/05.html",
+      "copy": { "brand": "TRACKLY", "headline": "Every watch face, one answer.", "subline": "What is left, right on the face you already use." },
+      "order": 5,
+      "placementType": "APP_SCREENSHOT",
+      "placementGroup": "IPHONE_DYNAMIC_ISLAND_LARGE_PROFILE"
     },
     {
-      "id": "search-01",
-      "kind": "search",
-      "spec": "search-3840x2560",
-      "file": "store/en-US/search-3840x2560/01.png",
-      "html": "store/en-US/search-3840x2560/01.html",
-      "copy": {
-        "kicker": "TRACKLY",
-        "hook": "Know what you can spend.",
-        "subhook": "A monthly limit that updates as you go."
-      },
-      "placementType": "APP_STORE_SEARCH_RESULTS_ASSET",
-      "placementGroup": null
+      "id": "shot-06",
+      "kind": "screenshot",
+      "spec": "iphone-1320x2868",
+      "file": "store/en-US/iphone-1320x2868/06.png",
+      "html": "store/en-US/iphone-1320x2868/06.html",
+      "copy": { "brand": "TRACKLY", "headline": "See where the month actually went.", "subline": "Patterns show the real story, not just the total." },
+      "order": 6,
+      "placementType": "APP_SCREENSHOT",
+      "placementGroup": "IPHONE_DYNAMIC_ISLAND_LARGE_PROFILE"
     },
     {
-      "id": "event-card-01",
-      "kind": "event-card",
-      "spec": "event-card-3840x2160",
-      "file": "store/en-US/event-card-3840x2160/01.png",
-      "html": "store/en-US/event-card-3840x2160/01.html",
-      "copy": {
-        "kicker": "IN-APP EVENT",
-        "title": "January Leaderboard Climb",
-        "sub": "Join the challenge · Jan 12–19"
-      },
-      "placementType": "EVENT_CARD_ASSET",
-      "placementGroup": null
+      "id": "shot-07",
+      "kind": "screenshot",
+      "spec": "iphone-1320x2868",
+      "file": "store/en-US/iphone-1320x2868/07.png",
+      "html": "store/en-US/iphone-1320x2868/07.html",
+      "copy": { "brand": "TRACKLY", "headline": "Categories that keep history clean.", "subline": "Six built-ins. Add your own when you need to." },
+      "order": 7,
+      "placementType": "APP_SCREENSHOT",
+      "placementGroup": "IPHONE_DYNAMIC_ISLAND_LARGE_PROFILE"
     },
     {
-      "id": "event-detail-01",
-      "kind": "event-detail",
-      "spec": "event-detail-2160x3840",
-      "file": "store/en-US/event-detail-2160x3840/01.png",
-      "html": "store/en-US/event-detail-2160x3840/01.html",
-      "copy": {
-        "kicker": "IN-APP EVENT",
-        "title": "New season, new patterns",
-        "sub": "A fresh look at the month."
-      },
-      "placementType": null,
-      "placementGroup": null
+      "id": "shot-08",
+      "kind": "screenshot",
+      "spec": "iphone-1320x2868",
+      "file": "store/en-US/iphone-1320x2868/08.png",
+      "html": "store/en-US/iphone-1320x2868/08.html",
+      "copy": { "brand": "TRACKLY", "headline": "Every subscription, one place.", "subline": "Know what is committed before the month starts." },
+      "order": 8,
+      "placementType": "APP_SCREENSHOT",
+      "placementGroup": "IPHONE_DYNAMIC_ISLAND_LARGE_PROFILE"
+    },
+    {
+      "id": "header-01", "kind": "header", "spec": "header-3840x1646",
+      "file": "store/en-US/header-3840x1646/01.png", "html": "store/en-US/header-3840x1646/01.html",
+      "copy": { "name": "Trackly", "mark": "T", "tagline": "Your money, in focus." },
+      "placementType": "PRODUCT_PAGE_HEADER_ASSET", "placementGroup": null
+    },
+    {
+      "id": "search-01", "kind": "search", "spec": "search-3840x2560",
+      "file": "store/en-US/search-3840x2560/01.png", "html": "store/en-US/search-3840x2560/01.html",
+      "copy": { "kicker": "TRACKLY", "hook": "Know what you can spend.", "subhook": "A monthly limit that updates as you go." },
+      "placementType": "APP_STORE_SEARCH_RESULTS_ASSET", "placementGroup": null
+    },
+    {
+      "id": "event-card-01", "kind": "event-card", "spec": "event-card-3840x2160",
+      "file": "store/en-US/event-card-3840x2160/01.png", "html": "store/en-US/event-card-3840x2160/01.html",
+      "copy": { "kicker": "IN-APP EVENT", "title": "January Leaderboard Climb", "sub": "Join the challenge · Jan 12–19" },
+      "placementType": "EVENT_CARD_ASSET", "placementGroup": null
+    },
+    {
+      "id": "event-detail-01", "kind": "event-detail", "spec": "event-detail-2160x3840",
+      "file": "store/en-US/event-detail-2160x3840/01.png", "html": "store/en-US/event-detail-2160x3840/01.html",
+      "copy": { "kicker": "IN-APP EVENT", "title": "New season, new patterns", "sub": "A fresh look at the month." },
+      "placementType": null, "placementGroup": null
     }
   ]
 }

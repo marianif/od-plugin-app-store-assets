@@ -37,6 +37,8 @@ const RUNTIME_FILES = [
   'assets/canvases/search.html',
   'assets/canvases/event-card.html',
   'assets/canvases/event-detail.html',
+  'assets/canvases/widgets.html',
+  'assets/canvases/watch.html',
   'assets/tokens.example.css',
   'references/apple-asset-rules.md',
   'references/asc-asset-library.md',
