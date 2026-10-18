@@ -32,8 +32,11 @@ Commands:
                                   list versions and localization ids
   groups     --app <id> [--placement <TYPE>]
                                   list placement groups/specs from live ref data
-  upload     --plan <file> --app <id> [--execute] [--version <v>] [--event <id>] [--group <id>]
+  upload     --plan <file> --app <id> [--execute] [--version <v>] [--event <id>] [--group <id>]\n                                  [--only id1,id2] [--skip-events]
                                   upload + place assets (dry-run by default)
+  images     --app <id> [--state <state>]
+                                  list asset-library images (find orphans)
+  delete-image --id <imageId>     delete one library image (no placements)
   status     --image <id>         poll an uploaded image
 
 Credentials:
@@ -154,6 +157,33 @@ function targetFor(kind, versionLocalizations, eventLocalizations, locale, flags
   return { targetType: 'appStoreVersionLocalization', targetId: entry.id };
 }
 
+async function cmdImages(flags) {
+  const config = await requireConfig();
+  const appId = appIdFor(flags, config);
+  const libraryId = await asc.getAssetLibrary(config, appId);
+  const images = await asc.listLibraryImages(config, libraryId, {
+    state: typeof flags.state === 'string' ? flags.state : undefined,
+  });
+  console.log(JSON.stringify({
+    appId,
+    libraryId,
+    count: images.length,
+    images: images.map((image) => ({
+      id: image.id,
+      referenceName: asc.attrsOf(image).referenceName,
+      state: asc.attrsOf(image).state,
+      specId: asc.attrsOf(image).specId,
+    })),
+  }, null, 2));
+}
+
+async function cmdDeleteImage(flags) {
+  const config = await requireConfig();
+  if (typeof flags.id !== 'string') fail('--id <imageId> is required.');
+  await asc.deleteImage(config, flags.id);
+  console.log(JSON.stringify({ ok: true, deleted: flags.id }, null, 2));
+}
+
 async function cmdUpload(flags) {
   const planPath = path.resolve(String(flags.plan || 'asset-plan.json'));
   const plan = JSON.parse(await fs.readFile(planPath, 'utf8'));
@@ -172,14 +202,18 @@ async function cmdUpload(flags) {
   const appId = typeof flags.app === 'string' ? flags.app : config.appId;
   if (!appId) fail('app id required: pass --app <id> or set appId in the ASC config.');
   const execute = flags.execute === true;
+  const locale = plan.locale || 'en-US';
+  const only = typeof flags.only === 'string'
+    ? new Set(String(flags.only).split(',').map((v) => v.trim()).filter(Boolean))
+    : null;
+  const skipEvents = flags['skip-events'] === true;
+  const selected = plan.assets.filter((asset) => !only || only.has(asset.id));
 
-  const actions = [];
-  for (const asset of plan.assets) {
+  const actions = selected.map((asset) => {
     const spec = getSpec(snapshot.data, asset.spec);
     const placementType = asset.placementType || spec.placementType;
     const group = asset.placementGroup || spec.placementGroup || (typeof flags.group === 'string' ? flags.group : null);
-    const category = spec.category || 'CREATIVE_ASSETS';
-    actions.push({
+    return {
       id: asset.id,
       file: asset.file,
       kind: asset.kind,
@@ -187,34 +221,30 @@ async function cmdUpload(flags) {
       pixels: `${spec.width}x${spec.height}`,
       placementType,
       placementGroup: group,
-      category,
+      category: spec.category || 'CREATIVE_ASSETS',
       order: asset.order ?? null,
-      locale: plan.locale || 'en-US',
-    });
-  }
+      referenceName: `${plan.app || 'App'} — ${asset.id || path.basename(asset.file)} — ${locale}`,
+    };
+  });
 
   if (!execute) {
     const report = {
       ok: true,
       dryRun: true,
       appId,
-      locale: plan.locale || 'en-US',
+      locale,
       credentials: hasCredentials ? 'present' : 'missing (local pre-flight only)',
       refdata: path.relative(process.cwd(), snapshot.path),
       validation: summary,
       actions,
       note: 'Re-run with --execute after an explicit confirmation to upload and create placements.',
     };
-
-    // With credentials, rehearse against live App Store Connect state: resolve
-    // the version/localizations, check each file fits a live spec for its
-    // placement type + group, and count the placements that would be replaced.
     if (hasCredentials) {
       try {
         const live = { libraryId: await asc.getAssetLibrary(config, appId) };
         const refData = await asc.getRefData(config);
         const platform = String(flags.platform || 'IOS');
-        const needsVersion = plan.assets.some((a) => !String(a.kind || '').startsWith('event'));
+        const needsVersion = selected.some((a) => !String(a.kind || '').startsWith('event'));
         if (needsVersion) {
           const versions = await asc.listVersions(config, appId, platform);
           const wanted = typeof flags.version === 'string' ? flags.version : null;
@@ -224,36 +254,38 @@ async function cmdUpload(flags) {
           if (version) {
             live.version = { id: version.id, versionString: asc.attrsOf(version).versionString, state: asc.attrsOf(version).appStoreState };
             live.localizations = (await asc.listVersionLocalizations(config, version.id)).map((l) => ({ id: l.id, locale: asc.attrsOf(l).locale }));
-            live.targetLocalization = (live.localizations || []).find((l) => l.locale === (plan.locale || 'en-US')) || null;
+            live.targetLocalization = (live.localizations || []).find((l) => l.locale === locale) || null;
           } else {
             live.versionError = wanted ? `version ${wanted} not found` : `no editable ${platform} version found`;
           }
         }
         if (live.targetLocalization) {
           live.checks = [];
-          for (const asset of plan.assets) {
-            const spec = getSpec(snapshot.data, asset.spec);
-            const placementType = asset.placementType || spec.placementType;
-            const group = asset.placementGroup || spec.placementGroup || (typeof flags.group === 'string' ? flags.group : null);
-            const allowed = placementType && group ? asc.specIdsForGroup(refData, placementType, group) : null;
+          for (const action of actions) {
+            if (String(action.kind || '').startsWith('event')) {
+              live.checks.push({ id: action.id, placementType: action.placementType, placementGroup: action.placementGroup, skipped: 'in-app event target' });
+              continue;
+            }
+            const allowed = action.placementType && action.placementGroup
+              ? asc.specIdsForGroup(refData, action.placementType, action.placementGroup)
+              : null;
+            const spec = getSpec(snapshot.data, action.spec);
             let fits = null;
             for (const specId of allowed || []) {
               const cover = asc.specCovers(refData, specId, spec.width, spec.height);
               if (cover && cover.ok) { fits = { specId, shortName: cover.shortName }; break; }
             }
-            let existing = null;
-            try {
-              const placements = await asc.listPlacements(config, 'appStoreVersionLocalization', live.targetLocalization.id, { placementType, placementGroup: group });
-              existing = placements.map((p) => p.id);
-            } catch { /* ignore */ }
+            const existing = await asc.listPlacementsDetailed(config, 'appStoreVersionLocalization', live.targetLocalization.id, {
+              placementType: action.placementType,
+              placementGroup: action.placementGroup,
+            }).catch(() => []);
             live.checks.push({
-              id: asset.id,
-              placementType,
-              placementGroup: group,
+              id: action.id,
+              placementType: action.placementType,
+              placementGroup: action.placementGroup,
               fitsLiveSpec: fits ? true : (allowed && allowed.length ? false : null),
               matchedSpec: fits ? fits.shortName : null,
-              liveSpecIds: (allowed || []).length,
-              wouldReplacePlacements: existing ? existing.length : null,
+              alreadyPlaced: existing.some((p) => p.referenceName === action.referenceName),
             });
           }
         }
@@ -262,133 +294,165 @@ async function cmdUpload(flags) {
         report.liveError = err?.message || String(err);
       }
     }
-
     console.log(JSON.stringify(report, null, 2));
     return;
   }
 
-  if (!hasCredentials) {
-    fail('--execute requires App Store Connect credentials. See README.md → ASC credentials.');
-  }
+  if (!hasCredentials) fail('--execute requires App Store Connect credentials. See README.md → ASC credentials.');
 
   const libraryId = await asc.getAssetLibrary(config, appId);
   const refData = await asc.getRefData(config);
-
-  let versionLocalizations = null;
-  let version = null;
-  const needsVersion = plan.assets.some((a) => !String(a.kind || '').startsWith('event'));
-  if (needsVersion) {
-    const versions = await asc.listVersions(config, appId, String(flags.platform || 'IOS'));
-    const wanted = typeof flags.version === 'string' ? flags.version : null;
-    version = wanted
-      ? versions.find((v) => asc.attrsOf(v).versionString === wanted)
-      : versions.find((v) => asc.attrsOf(v).appStoreState === 'PREPARE_FOR_SUBMISSION');
-    if (!version) {
-      fail(
-        wanted
-          ? `version ${wanted} not found.`
-          : 'no editable version (state PREPARE_FOR_SUBMISSION) found. Pass --version <v> for a specific version.',
-      );
-    }
-    versionLocalizations = await asc.listVersionLocalizations(config, version.id);
-  }
-
-  let eventLocalizations = null;
-  if (typeof flags.event === 'string') {
-    eventLocalizations = await asc.listEventLocalizations(config, flags.event);
-  }
-
+  const platform = String(flags.platform || 'IOS');
   const report = {
     ok: false,
     appId,
     libraryId,
-    locale: plan.locale || 'en-US',
-    version: version ? { id: version.id, versionString: asc.attrsOf(version).versionString } : null,
+    locale,
     assets: [],
+    skipped: [],
     ordering: [],
     warning: 'Assets are uploaded and placed. Submit the parent surface in App Store Connect; this script never submits for review.',
   };
 
+  // Version + localization (only when the plan has non-event assets).
+  let versionLocalizations = null;
+  if (selected.some((a) => !String(a.kind || '').startsWith('event'))) {
+    const versions = await asc.listVersions(config, appId, platform);
+    const wanted = typeof flags.version === 'string' ? flags.version : null;
+    const version = wanted
+      ? versions.find((v) => asc.attrsOf(v).versionString === wanted)
+      : versions.find((v) => asc.attrsOf(v).appStoreState === 'PREPARE_FOR_SUBMISSION');
+    if (!version) fail(wanted ? `version ${wanted} not found.` : `no editable ${platform} version found; pass --version <v>.`);
+    report.version = { id: version.id, versionString: asc.attrsOf(version).versionString };
+    versionLocalizations = await asc.listVersionLocalizations(config, version.id);
+  }
+  let eventLocalizations = typeof flags.event === 'string'
+    ? await asc.listEventLocalizations(config, flags.event)
+    : null;
+
+  // Adopt images that are already in the library (idempotent re-runs).
+  const libraryImages = await asc.listLibraryImages(config, libraryId).catch(() => []);
+  const imageByRef = new Map(libraryImages.map((image) => [asc.attrsOf(image).referenceName, image]));
+
+  const placementCache = new Map();
+  const placementsFor = async (targetType, targetId, placementType, group) => {
+    const key = `${targetId}::${placementType}::${group}`;
+    if (!placementCache.has(key)) {
+      placementCache.set(key, await asc.listPlacementsDetailed(config, targetType, targetId, { placementType, placementGroup: group }).catch(() => []));
+    }
+    return placementCache.get(key);
+  };
+
   try {
-    for (const asset of plan.assets) {
+    for (const asset of selected) {
+      const isEvent = String(asset.kind || '').startsWith('event');
+      if (isEvent && (skipEvents || !flags.event)) {
+        report.skipped.push({ id: asset.id, reason: 'in-app event media needs an event; create it in App Store Connect and re-run with --event <id>' });
+        continue;
+      }
       const spec = getSpec(snapshot.data, asset.spec);
       const placementType = asset.placementType || spec.placementType;
       const group = asset.placementGroup || spec.placementGroup || (typeof flags.group === 'string' ? flags.group : null);
-      if (!placementType) fail(`asset ${asset.id}: no placement type (event detail ids must come from live ref data).`);
-      if (!group) {
-        fail(
-          `asset ${asset.id}: no placement group. Run scripts/refdata.mjs --placement ${placementType} and pass ` +
-          'the correct group with --group <id> or per-asset "placementGroup".',
-        );
-      }
-      const target = targetFor(asset.kind, versionLocalizations, eventLocalizations, plan.locale || 'en-US', flags);
+      if (!placementType) fail(`asset ${asset.id}: no placement type for this spec.`);
+      if (!group) fail(`asset ${asset.id}: no placement group. Run scripts/refdata.mjs --placement ${placementType} and pass --group.`);
+
+      const target = isEvent
+        ? targetFor(asset.kind, versionLocalizations, eventLocalizations, locale, flags)
+        : targetFor(asset.kind, versionLocalizations, null, locale, flags);
+      const referenceName = `${plan.app || 'App'} — ${asset.id} — ${locale}`;
       const filePath = path.resolve(process.cwd(), asset.file);
       const buffer = await fs.readFile(filePath);
       const category = spec.category || 'CREATIVE_ASSETS';
 
-      const reservation = await asc.reserveImage(config, {
-        libraryId,
-        fileName: path.basename(asset.file),
-        fileSize: buffer.length,
-        category,
-        referenceName: `${plan.app || 'App'} — ${asset.id || path.basename(asset.file)} — ${plan.locale || 'en-US'}`,
-      });
-      await asc.uploadParts(reservation, buffer);
-      await asc.commitImage(config, reservation.id);
-      const processed = await asc.waitForImage(config, reservation.id);
-      const actualSpecId = asc.attrsOf(processed).specId;
+      // Pre-flight: does the file match a live spec for this type + group?
       const allowed = asc.specIdsForGroup(refData, placementType, group);
-      if (Array.isArray(allowed) && allowed.length && actualSpecId && !allowed.includes(actualSpecId)) {
-        throw new Error(
-          `asset ${asset.id}: App Store Connect matched spec ${actualSpecId}, which is not in the allowed set for ` +
-          `${placementType} / ${group}. Re-render at the exact dimensions reported by refdata.`,
-        );
+      let matchedSpecId = null;
+      for (const specId of allowed || []) {
+        const cover = asc.specCovers(refData, specId, spec.width, spec.height);
+        if (cover && cover.ok) { matchedSpecId = specId; break; }
+      }
+      if (Array.isArray(allowed) && allowed.length && !matchedSpecId) {
+        throw new Error(`asset ${asset.id}: ${spec.width}x${spec.height} is not accepted for ${placementType} / ${group}.`);
       }
 
-      const existing = await asc.listPlacements(config, target.targetType, target.targetId, {
-        placementType,
-        placementGroup: group,
-      });
-      for (const placement of existing) {
-        await asc.deletePlacement(config, placement.id);
+      // 1. Image: adopt or upload.
+      let image = imageByRef.get(referenceName);
+      let imageAction = 'existing';
+      if (image && asc.attrsOf(image).state === 'FAILED') {
+        await asc.deleteImage(config, image.id);
+        image = null;
       }
-      const placement = await asc.createPlacement(config, {
-        placementType,
-        placementGroup: group,
-        assetType: 'image',
-        assetId: reservation.id,
-        targetType: target.targetType,
-        targetId: target.targetId,
-      });
+      if (!image) {
+        const reservation = await asc.reserveImage(config, {
+          libraryId,
+          fileName: path.basename(asset.file),
+          fileSize: buffer.length,
+          category,
+          referenceName,
+        });
+        await asc.uploadParts(reservation, buffer);
+        await asc.commitImage(config, reservation.id);
+        image = await asc.waitForImage(config, reservation.id);
+        imageByRef.set(referenceName, image);
+        imageAction = 'uploaded';
+      }
+      const actualSpecId = asc.attrsOf(image).specId;
+      if (matchedSpecId && actualSpecId && actualSpecId !== matchedSpecId) {
+        throw new Error(`asset ${asset.id}: Apple matched spec ${actualSpecId}, expected ${matchedSpecId}.`);
+      }
+
+      // 2. Placement: create only if this asset is not already placed.
+      let placements = await placementsFor(target.targetType, target.targetId, placementType, group);
+      let placement = placements.find((p) => p.referenceName === referenceName) || null;
+      if (!placement) {
+        // Remove stale duplicates of this same asset (earlier broken runs).
+        for (const stale of placements.filter((p) => p.referenceName === referenceName)) {
+          await asc.deletePlacement(config, stale.id);
+        }
+        const created = await asc.createPlacement(config, {
+          placementType,
+          placementGroup: group,
+          assetType: 'image',
+          assetId: image.id,
+          targetType: target.targetType,
+          targetId: target.targetId,
+        });
+        placementCache.delete(`${target.targetId}::${placementType}::${group}`);
+        placements = await placementsFor(target.targetType, target.targetId, placementType, group);
+        placement = placements.find((p) => p.referenceName === referenceName) || { id: created?.id || null };
+      }
 
       report.assets.push({
         id: asset.id,
         file: asset.file,
-        imageId: reservation.id,
+        imageAction,
+        imageId: image.id,
         specId: actualSpecId,
-        state: asc.attrsOf(processed).state,
-        placement: { id: placement?.id, type: placementType, group, target: target.targetType },
+        state: asc.attrsOf(image).state,
+        placement: { id: placement?.id || null, type: placementType, group, target: target.targetType },
       });
     }
 
-    // Order screenshots per (target, group). Events are not orderable.
+    // 3. Order each screenshot group by the plan's order.
     const groupsToOrder = new Map();
-    for (const asset of plan.assets) {
-      if (asset.kind !== 'screenshot') continue;
+    for (const asset of selected) {
+      if (asset.kind !== 'screenshot' || String(asset.kind).startsWith('event')) continue;
       const spec = getSpec(snapshot.data, asset.spec);
       const group = asset.placementGroup || spec.placementGroup || (typeof flags.group === 'string' ? flags.group : null);
-      const target = targetFor(asset.kind, versionLocalizations, eventLocalizations, plan.locale || 'en-US', flags);
+      const target = targetFor(asset.kind, versionLocalizations, null, locale, flags);
       if (target.targetType === 'appEventLocalization') continue;
       const key = `${target.targetId}::${group}`;
       if (!groupsToOrder.has(key)) groupsToOrder.set(key, { target, group, items: [] });
-      const uploaded = report.assets.find((a) => a.id === asset.id);
-      groupsToOrder.get(key).items.push({ order: asset.order ?? 0, placementId: uploaded?.placement?.id });
+      const ref = `${plan.app || 'App'} — ${asset.id} — ${locale}`;
+      groupsToOrder.get(key).items.push({ order: Number(asset.order || 0), ref });
     }
     for (const { target, group, items } of groupsToOrder.values()) {
+      const placements = await placementsFor(target.targetType, target.targetId, 'APP_SCREENSHOT', group);
+      const byRef = new Map(placements.map((p) => [p.referenceName, p.id]));
       const ordered = items
-        .filter((i) => i.placementId)
         .sort((a, b) => a.order - b.order)
-        .map((i) => i.placementId);
+        .map((i) => byRef.get(i.ref))
+        .filter(Boolean);
       if (ordered.length > 1) {
         await asc.orderPlacements(config, {
           placementGroup: group,
@@ -396,21 +460,19 @@ async function cmdUpload(flags) {
           targetType: target.targetType,
           targetId: target.targetId,
         });
-        report.ordering.push({ group, placements: ordered });
+        report.ordering.push({ group, placements: ordered.length });
       }
     }
 
     report.ok = true;
   } catch (err) {
     report.error = err?.message || String(err);
-    const reportPath = path.resolve('upload-report.json');
-    await fs.writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`, 'utf8');
-    fail(`${report.error}\nPartial report written to ${reportPath}`);
+    await fs.writeFile(path.resolve('upload-report.json'), `${JSON.stringify(report, null, 2)}\n`, 'utf8');
+    fail(`${report.error}\nPartial report written to upload-report.json`);
   }
 
-  const reportPath = path.resolve('upload-report.json');
-  await fs.writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`, 'utf8');
-  console.log(JSON.stringify({ ...report, report: reportPath }, null, 2));
+  await fs.writeFile(path.resolve('upload-report.json'), `${JSON.stringify(report, null, 2)}\n`, 'utf8');
+  console.log(JSON.stringify(report, null, 2));
 }
 
 async function cmdStatus(flags) {
@@ -446,6 +508,8 @@ async function main() {
     case 'library': await cmdLibrary(flags); break;
     case 'localizations': await cmdLocalizations(flags); break;
     case 'groups': await cmdGroups(flags); break;
+    case 'images': await cmdImages(flags); break;
+    case 'delete-image': await cmdDeleteImage(flags); break;
     case 'upload': await cmdUpload(flags); break;
     case 'status': await cmdStatus(flags); break;
     default:

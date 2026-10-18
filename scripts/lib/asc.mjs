@@ -353,6 +353,22 @@ export async function waitForImage(config, imageId, { timeoutMs = 10 * 60 * 1000
   throw new Error(`timed out waiting for asset ${imageId}; last state ${attrs(last).state}`);
 }
 
+export async function listLibraryImages(config, libraryId, { state } = {}) {
+  const { json } = await ascFetch(
+    config,
+    `/appAssetLibraries/${encodeURIComponent(libraryId)}/images${qs({
+      limit: 200,
+      'fields[appAssetLibraryImages]': 'referenceName,state,fileName,specId',
+      'filter[state]': state,
+    })}`,
+  );
+  return json?.data || [];
+}
+
+export async function deleteImage(config, imageId) {
+  await ascFetch(config, `/appAssetLibraryImages/${encodeURIComponent(imageId)}`, { method: 'DELETE' });
+}
+
 // ---- placements -----------------------------------------------------------
 
 const PLACEMENT_TARGET_ROUTE = {
@@ -377,13 +393,54 @@ export async function listPlacements(config, targetType, targetId, { placementTy
   return json?.data || [];
 }
 
+export async function listPlacementsDetailed(config, targetType, targetId, { placementType, placementGroup } = {}) {
+  const route = PLACEMENT_TARGET_ROUTE[targetType];
+  if (!route) throw new Error(`unsupported placement target type: ${targetType}`);
+  const { json } = await ascFetch(config, `/${route}/${encodeURIComponent(targetId)}/placements${qs({
+    'filter[placementType]': placementType,
+    'filter[placementGroup]': placementGroup,
+    limit: 200,
+    sort: 'placementGroupPosition',
+    include: 'image',
+    'fields[appAssetLibraryImages]': 'referenceName,state,specId',
+  })}`);
+  const byId = new Map((json?.included || []).map((node) => [node.id, attrs(node)]));
+  return (json?.data || []).map((placement) => {
+    const a = attrs(placement);
+    const imageId = placement.relationships?.image?.data?.id || null;
+    const image = imageId ? byId.get(imageId) || {} : {};
+    return {
+      id: placement.id,
+      placementType: a.placementType,
+      placementGroup: a.placementGroup,
+      state: a.state,
+      imageId,
+      referenceName: image.referenceName || null,
+      imageState: image.state || null,
+      specId: image.specId || null,
+    };
+  });
+}
+
 export async function deletePlacement(config, placementId) {
   await ascFetch(config, `/appAssetLibraryPlacements/${encodeURIComponent(placementId)}`, { method: 'DELETE' });
 }
 
+// The relationship NAME is singular (appStoreVersionLocalization) but the
+// JSON:API resource TYPE is plural (appStoreVersionLocalizations). Sending the
+// singular form fails with 409 ENTITY_ERROR.RELATIONSHIP.INVALID.
+const PLACEMENT_TARGET_TYPE = {
+  appStoreVersionLocalization: 'appStoreVersionLocalizations',
+  appCustomProductPageLocalization: 'appCustomProductPageLocalizations',
+  appEventLocalization: 'appEventLocalizations',
+  appStoreVersionExperimentTreatmentLocalization: 'appStoreVersionExperimentTreatmentLocalizations',
+};
+
 export async function createPlacement(config, {
   placementType, placementGroup, assetType = 'image', assetId, targetType, targetId,
 }) {
+  const targetResourceType = PLACEMENT_TARGET_TYPE[targetType];
+  if (!targetResourceType) throw new Error(`unsupported placement target: ${targetType}`);
   const body = {
     data: {
       type: 'appAssetLibraryPlacements',
@@ -393,7 +450,7 @@ export async function createPlacement(config, {
       },
       relationships: {
         [assetType]: { data: { type: assetType === 'image' ? 'appAssetLibraryImages' : 'appAssetLibraryVideos', id: assetId } },
-        [targetType]: { data: { type: targetType, id: targetId } },
+        [targetType]: { data: { type: targetResourceType, id: targetId } },
       },
     },
   };
@@ -402,6 +459,8 @@ export async function createPlacement(config, {
 }
 
 export async function orderPlacements(config, { placementGroup, placementIds, targetType, targetId }) {
+  const targetResourceType = PLACEMENT_TARGET_TYPE[targetType];
+  if (!targetResourceType) throw new Error(`unsupported ordering target: ${targetType}`);
   const body = {
     data: {
       type: 'appAssetLibraryPlacementOrderingRequests',
@@ -410,7 +469,7 @@ export async function orderPlacements(config, { placementGroup, placementIds, ta
         orderedPlacements: {
           data: placementIds.map((id) => ({ type: 'appAssetLibraryPlacements', id })),
         },
-        [targetType]: { data: { type: targetType, id: targetId } },
+        [targetType]: { data: { type: targetResourceType, id: targetId } },
       },
     },
   };
