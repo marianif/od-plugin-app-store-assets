@@ -365,6 +365,11 @@ export async function listLibraryImages(config, libraryId, { state } = {}) {
   return json?.data || [];
 }
 
+export async function listImagePlacements(config, imageId) {
+  const { json } = await ascFetch(config, `/appAssetLibraryImages/${encodeURIComponent(imageId)}/placements${qs({ limit: 200 })}`);
+  return json?.data || [];
+}
+
 export async function deleteImage(config, imageId) {
   await ascFetch(config, `/appAssetLibraryImages/${encodeURIComponent(imageId)}`, { method: 'DELETE' });
 }

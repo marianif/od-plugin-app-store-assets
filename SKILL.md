@@ -52,9 +52,16 @@ Inside an OpenDesign project, copy the runtime files once:
 ```bash
 mkdir -p .app-store-assets
 curl -fsSL "$OD_DAEMON_URL/api/plugins/app-store-assets/asset/scripts/bootstrap.mjs" \
+  -o .app-store-assets/bootstrap.mjs ||
+curl -fsSL "$OD_DAEMON_URL/api/plugins/community-app-store-assets/asset/scripts/bootstrap.mjs" \
   -o .app-store-assets/bootstrap.mjs
 node .app-store-assets/bootstrap.mjs
 ```
+
+The first URL is the standalone plugin id; the second the OpenDesign community
+id. `bootstrap.mjs` also probes both ids itself; pass `--plugin-id <id>` if you
+installed under a different name. It reports the resolved id in
+`bootstrap.json`.
 
 If `OD_DAEMON_URL` is unset, resolve it from the CLI first:
 
@@ -247,9 +254,14 @@ What `--execute` does:
 - Reserves each file, uploads the parts, commits with `uploaded: true`, polls
   until `PREPARE_FOR_SUBMISSION`.
 - Verifies the returned `specId` is valid for the placement type + group.
-- Replaces existing placements of the same type + group, creates the new ones,
-  and orders screenshots.
-- Writes `upload-report.json`.
+- **Revisions are tracked by content**: the reference name carries a short
+  digest of the file. Unchanged files are adopted; a re-rendered file becomes a
+  new image, its old placement is replaced and the superseded image is retired.
+  Re-running is safe and idempotent.
+- Orders screenshots per group, then writes `upload-report.json`.
+- `--prune` additionally removes placements and unused images whose asset id is
+  no longer in the plan (renamed or deleted assets). It refuses to run together
+  with `--only`, since a partial plan would prune everything else.
 
 It does **not** submit the version, the event, or the assets for review, and it
 does not create In-App Event records. Those stay manual (see `ROADMAP.md`).

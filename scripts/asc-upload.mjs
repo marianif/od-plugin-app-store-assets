@@ -14,6 +14,7 @@
 // v1 stops after placements + ordering. It never submits the parent surface
 // for review, and it does not create in-app event records (see ROADMAP.md).
 
+import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { parseArgs, fail } from './lib/daemon.mjs';
@@ -32,7 +33,8 @@ Commands:
                                   list versions and localization ids
   groups     --app <id> [--placement <TYPE>]
                                   list placement groups/specs from live ref data
-  upload     --plan <file> --app <id> [--execute] [--version <v>] [--event <id>] [--group <id>]\n                                  [--only id1,id2] [--skip-events]
+  upload     --plan <file> --app <id> [--execute] [--version <v>] [--event <id>] [--group <id>]\n                                  [--only id1,id2] [--skip-events] [--prune]
+                                  [--allow-event-locale-fallback]
                                   upload + place assets (dry-run by default)
   images     --app <id> [--state <state>]
                                   list asset-library images (find orphans)
@@ -45,6 +47,9 @@ Credentials:
 
 Safety:
   - dry-run is the default; --execute is required to mutate App Store Connect
+  - a re-rendered file is a new revision: the reference name carries a content
+    digest, the old placement is replaced and the superseded image is retired
+  - --prune removes placements/images whose asset id is no longer in the plan
   - app preview videos, event creation and review submission are out of v1
 `);
 }
@@ -143,16 +148,23 @@ function targetFor(kind, versionLocalizations, eventLocalizations, locale, flags
   const isEvent = String(kind || '').startsWith('event');
   if (isEvent) {
     if (!eventLocalizations) {
-      fail('event assets require --event <eventId> (or create the event in App Store Connect first).');
+      throw new Error('event assets require --event <eventId> (or create the event in App Store Connect first).');
     }
-    const entry = eventLocalizations.find((l) => asc.attrsOf(l).locale === locale) || eventLocalizations[0];
-    if (!entry) fail('the selected in-app event has no localization.');
+    const locales = eventLocalizations.map((l) => asc.attrsOf(l).locale);
+    let entry = eventLocalizations.find((l) => asc.attrsOf(l).locale === locale) || null;
+    if (!entry && flags['allow-event-locale-fallback'] === true) entry = eventLocalizations[0] || null;
+    if (!entry) {
+      throw new Error(
+        `the selected in-app event has no ${locale} localization; available: ${locales.join(', ') || 'none'}. ` +
+        'Pass --allow-event-locale-fallback to place on the first localization instead.',
+      );
+    }
     return { targetType: 'appEventLocalization', targetId: entry.id };
   }
   const entry = versionLocalizations.find((l) => asc.attrsOf(l).locale === locale);
   if (!entry) {
     const locales = versionLocalizations.map((l) => asc.attrsOf(l).locale).join(', ');
-    fail(`locale ${locale} not found on the chosen version. Available: ${locales || 'none'}`);
+    throw new Error(`locale ${locale} not found on the chosen version. Available: ${locales || 'none'}`);
   }
   return { targetType: 'appStoreVersionLocalization', targetId: entry.id };
 }
@@ -209,11 +221,25 @@ async function cmdUpload(flags) {
   const skipEvents = flags['skip-events'] === true;
   const selected = plan.assets.filter((asset) => !only || only.has(asset.id));
 
-  const actions = selected.map((asset) => {
+  // The reference name carries a short content digest, so a re-rendered file is a
+  // new asset rather than a silent no-op on the previous upload. The prefix (app,
+  // plan id, locale) identifies the slot for replacement and cleanup.
+  const appLabel = plan.app || 'App';
+  const slotFor = (asset) => `${appLabel} — ${asset.id || path.basename(asset.file)} — ${locale}`;
+  const digestOf = async (file) => {
+    const bytes = await fs.readFile(path.resolve(process.cwd(), file));
+    return crypto.createHash('sha256').update(bytes).digest('hex').slice(0, 12);
+  };
+
+  const actions = [];
+  for (const asset of selected) {
     const spec = getSpec(snapshot.data, asset.spec);
     const placementType = asset.placementType || spec.placementType;
     const group = asset.placementGroup || spec.placementGroup || (typeof flags.group === 'string' ? flags.group : null);
-    return {
+    let digest = null;
+    try { digest = await digestOf(asset.file); } catch { digest = null; }
+    const slot = slotFor(asset);
+    actions.push({
       id: asset.id,
       file: asset.file,
       kind: asset.kind,
@@ -223,9 +249,13 @@ async function cmdUpload(flags) {
       placementGroup: group,
       category: spec.category || 'CREATIVE_ASSETS',
       order: asset.order ?? null,
-      referenceName: `${plan.app || 'App'} — ${asset.id || path.basename(asset.file)} — ${locale}`,
-    };
-  });
+      digest,
+      referencePrefix: slot,
+      referenceName: digest ? `${slot} — ${digest}` : slot,
+    });
+  }
+  const actionById = new Map(actions.map((action) => [action.id, action]));
+  const isSlotOf = (referenceName, slot) => referenceName === slot || String(referenceName || '').startsWith(`${slot} — `);
 
   if (!execute) {
     const report = {
@@ -286,6 +316,7 @@ async function cmdUpload(flags) {
               fitsLiveSpec: fits ? true : (allowed && allowed.length ? false : null),
               matchedSpec: fits ? fits.shortName : null,
               alreadyPlaced: existing.some((p) => p.referenceName === action.referenceName),
+              wouldReplacePlacements: existing.filter((p) => isSlotOf(p.referenceName, action.referencePrefix) && p.referenceName !== action.referenceName).length,
             });
           }
         }
@@ -359,7 +390,9 @@ async function cmdUpload(flags) {
       const target = isEvent
         ? targetFor(asset.kind, versionLocalizations, eventLocalizations, locale, flags)
         : targetFor(asset.kind, versionLocalizations, null, locale, flags);
-      const referenceName = `${plan.app || 'App'} — ${asset.id} — ${locale}`;
+      const action = actionById.get(asset.id) || null;
+      const referenceName = action ? action.referenceName : slotFor(asset);
+      const referencePrefix = action ? action.referencePrefix : slotFor(asset);
       const filePath = path.resolve(process.cwd(), asset.file);
       const buffer = await fs.readFile(filePath);
       const category = spec.category || 'CREATIVE_ASSETS';
@@ -375,7 +408,7 @@ async function cmdUpload(flags) {
         throw new Error(`asset ${asset.id}: ${spec.width}x${spec.height} is not accepted for ${placementType} / ${group}.`);
       }
 
-      // 1. Image: adopt or upload.
+      // 1. Image: adopt an exact content match or upload a new revision.
       let image = imageByRef.get(referenceName);
       let imageAction = 'existing';
       if (image && asc.attrsOf(image).state === 'FAILED') {
@@ -405,8 +438,9 @@ async function cmdUpload(flags) {
       let placements = await placementsFor(target.targetType, target.targetId, placementType, group);
       let placement = placements.find((p) => p.referenceName === referenceName) || null;
       if (!placement) {
-        // Remove stale duplicates of this same asset (earlier broken runs).
-        for (const stale of placements.filter((p) => p.referenceName === referenceName)) {
+        // Replace every earlier revision of this same slot (older digest, or a
+        // reference from a previous run that had no digest).
+        for (const stale of placements.filter((p) => isSlotOf(p.referenceName, referencePrefix))) {
           await asc.deletePlacement(config, stale.id);
         }
         const created = await asc.createPlacement(config, {
@@ -422,15 +456,71 @@ async function cmdUpload(flags) {
         placement = placements.find((p) => p.referenceName === referenceName) || { id: created?.id || null };
       }
 
+      // Retire superseded library images for this slot once the new placement exists.
+      const superseded = [...imageByRef.entries()].filter(([ref]) => ref !== referenceName && isSlotOf(ref, referencePrefix));
+      for (const [ref, old] of superseded) {
+        try {
+          const uses = await asc.listImagePlacements(config, old.id);
+          if (!uses.length) {
+            await asc.deleteImage(config, old.id);
+            imageByRef.delete(ref);
+            report.retiredImages = [...(report.retiredImages || []), { imageId: old.id, referenceName: ref }];
+          }
+        } catch { /* best effort */ }
+      }
+
       report.assets.push({
         id: asset.id,
         file: asset.file,
+        digest: action?.digest || null,
         imageAction,
         imageId: image.id,
         specId: actualSpecId,
         state: asc.attrsOf(image).state,
         placement: { id: placement?.id || null, type: placementType, group, target: target.targetType },
       });
+    }
+
+    // 2b. Optional prune: drop placements and unused images that belong to our
+    // slot namespace but are no longer in the plan (renamed or removed assets).
+    if (flags.prune === true) {
+      if (only) throw new Error('--prune cannot be combined with --only (a partial plan would prune everything else).');
+      const planPrefix = `${appLabel} — `;
+      const planIds = new Set(actions.map((a) => a.id));
+      const managed = new Map();
+      for (const action of actions) {
+        if (String(action.kind || '').startsWith('event')) continue;
+        const target = targetFor(action.kind, versionLocalizations, null, locale, flags);
+        managed.set(`${target.targetId}::${action.placementType}::${action.placementGroup}`, {
+          target, placementType: action.placementType, group: action.placementGroup,
+        });
+      }
+      for (const { target, placementType, group } of managed.values()) {
+        const placements = await placementsFor(target.targetType, target.targetId, placementType, group);
+        for (const p of placements) {
+          const ref = p.referenceName || '';
+          if (!ref.startsWith(planPrefix)) continue;
+          const assetId = ref.slice(planPrefix.length).split(' — ')[0];
+          if (planIds.has(assetId)) continue;
+          await asc.deletePlacement(config, p.id);
+          placementCache.delete(`${target.targetId}::${placementType}::${group}`);
+          report.pruned = [...(report.pruned || []), { placementId: p.id, referenceName: ref, reason: 'asset not in plan' }];
+        }
+      }
+      const images = await asc.listLibraryImages(config, libraryId).catch(() => []);
+      for (const img of images) {
+        const ref = asc.attrsOf(img).referenceName || '';
+        if (!ref.startsWith(planPrefix)) continue;
+        const assetId = ref.slice(planPrefix.length).split(' — ')[0];
+        if (planIds.has(assetId)) continue;
+        try {
+          const uses = await asc.listImagePlacements(config, img.id);
+          if (!uses.length) {
+            await asc.deleteImage(config, img.id);
+            report.pruned = [...(report.pruned || []), { imageId: img.id, referenceName: ref, reason: 'asset not in plan' }];
+          }
+        } catch { /* best effort */ }
+      }
     }
 
     // 3. Order each screenshot group by the plan's order.
@@ -443,8 +533,9 @@ async function cmdUpload(flags) {
       if (target.targetType === 'appEventLocalization') continue;
       const key = `${target.targetId}::${group}`;
       if (!groupsToOrder.has(key)) groupsToOrder.set(key, { target, group, items: [] });
-      const ref = `${plan.app || 'App'} — ${asset.id} — ${locale}`;
-      groupsToOrder.get(key).items.push({ order: Number(asset.order || 0), ref });
+      const action = actionById.get(asset.id);
+      if (!action) continue;
+      groupsToOrder.get(key).items.push({ order: Number(asset.order || 0), ref: action.referenceName });
     }
     for (const { target, group, items } of groupsToOrder.values()) {
       const placements = await placementsFor(target.targetType, target.targetId, 'APP_SCREENSHOT', group);

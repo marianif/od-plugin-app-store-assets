@@ -14,7 +14,7 @@ applied as a pre-flight check.
   reference data — no hardcoded device list
 - **Upload** to the App Asset Library (`appAssetLibraryImages`,
   `appAssetLibraryPlacements`) with a dry-run and explicit confirmation
-- **Idempotent** — re-runs adopt images and placements already in the library
+- **Revision-aware** — reference names carry a content digest, so a re-rendered file replaces its previous upload instead of being skipped; unchanged files are adopted
 - **No credentials in prompts**: the upload script reads them from a local
   config file or environment variables
 
@@ -105,6 +105,8 @@ node .app-store-assets/scripts/asc-upload.mjs library --app 1234567890
 node .app-store-assets/scripts/refdata.mjs                     # freeze the live catalog
 node .app-store-assets/scripts/asc-upload.mjs upload --plan asset-plan.json --app 1234567890 --version 1.0
 node .app-store-assets/scripts/asc-upload.mjs upload --plan asset-plan.json --app 1234567890 --version 1.0 --execute
+# optional: also remove placements/images for assets no longer in the plan
+node .app-store-assets/scripts/asc-upload.mjs upload --plan asset-plan.json --app 1234567890 --version 1.0 --prune --execute
 ```
 
 `upload` is a dry-run by default; it resolves the version, localization, matches
@@ -115,6 +117,7 @@ it would change. `--execute` performs it. The script never submits for review.
 
 ```bash
 od plugin validate ./od-plugin-app-store-assets
+node scripts/selftest.mjs                             # image gates: bytes vs extension, alpha, dimensions
 pnpm --filter @open-design/plugin-runtime typecheck   # only inside the OD repo
 ```
 

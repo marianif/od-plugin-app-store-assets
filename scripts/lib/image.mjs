@@ -88,6 +88,19 @@ function inspectJpeg(buf, file) {
   return { file, format: 'jpeg', width: null, height: null, hasAlpha: false, bytes: buf.length, valid: false, error: 'could not find a JPEG SOF segment' };
 }
 
+// Content format implied by a file extension. Used to reject a JPEG that is
+// merely *named* .png (and to map spec.formats onto detected bytes).
+const FORMAT_BY_EXTENSION = {
+  '.png': 'png',
+  '.jpg': 'jpeg',
+  '.jpeg': 'jpeg',
+  '.mov': 'mov',
+  '.mp4': 'mp4',
+  '.m4v': 'm4v',
+};
+
+export { FORMAT_BY_EXTENSION };
+
 export function assertSpecMatch(info, spec) {
   const problems = [];
   if (!info.valid) problems.push(info.error || 'invalid image');
@@ -95,9 +108,22 @@ export function assertSpecMatch(info, spec) {
     problems.push(`expected ${spec.width}x${spec.height}, got ${info.width}x${info.height}`);
   }
   if (spec.alphaAllowed === false && info.hasAlpha) problems.push('image has an alpha channel (not allowed)');
+
   const allowedFormats = spec.formats || ['.png', '.jpg', '.jpeg'];
   const ext = path.extname(info.file).toLowerCase();
   if (!allowedFormats.includes(ext)) problems.push(`format ${ext} not in ${allowedFormats.join(', ')}`);
+
+  // The bytes must agree with the name (a JPEG renamed .png is not a PNG) and
+  // the detected format must be one the spec accepts.
+  const expectedFromExt = FORMAT_BY_EXTENSION[ext];
+  if (expectedFromExt && info.format && expectedFromExt !== info.format) {
+    problems.push(`file content is ${String(info.format).toUpperCase()} but the extension is ${ext}`);
+  }
+  const allowedContentFormats = allowedFormats.map((f) => FORMAT_BY_EXTENSION[f]).filter(Boolean);
+  if (info.format && allowedContentFormats.length && !allowedContentFormats.includes(info.format)) {
+    problems.push(`content format ${info.format} not accepted here (expected ${allowedContentFormats.join(', ')})`);
+  }
+
   if (spec.maxBytes && info.bytes > spec.maxBytes) problems.push(`file is ${info.bytes} bytes, over ${spec.maxBytes}`);
   return problems;
 }

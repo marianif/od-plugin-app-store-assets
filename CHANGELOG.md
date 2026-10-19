@@ -18,8 +18,13 @@ First public release.
   kind/spec/placement agreement, and copy lint (prices, URLs, ©/®/™, Apple
   recognitions, other platforms, unverifiable claims).
 - Uploader: App Store Connect App Asset Library (ASC API 4.5.1+) — reserve,
-  upload, commit, poll, placement, ordering. Dry-run by default; idempotent
-  (adopts images and placements already in the library).
+  upload, commit, poll, placement, ordering. Dry-run by default.
+- Revision tracking: reference names carry a content digest; a re-rendered file
+  replaces its previous placement and retires the superseded image. Unchanged
+  files are adopted. `--prune` removes assets no longer in the plan.
+- Strict event locales (exact match, no silent fallback), and the file-format
+  preflight now rejects bytes that disagree with the extension.
+- `scripts/selftest.mjs` covers the image gates with real generated fixtures.
 - Live spec resolution from `GET /v1/appAssetLibraryRefData` with a dated
   offline snapshot (2026-10-18) as fallback.
 - Verified live on App Store Connect: 8 iPhone screenshots placed and ordered,

@@ -18,7 +18,11 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const PLUGIN_ID = 'app-store-assets';
+// The standalone repo installs as `app-store-assets`; the OpenDesign community
+// catalog copy (plugins/community/app-store-assets) is published under the same
+// manifest id. Older or renamed installs are still resolvable via the candidate
+// list, so the bootstrap URL never depends on one hardcoded id.
+const PLUGIN_ID_CANDIDATES = ['app-store-assets', 'community-app-store-assets'];
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 
 const RUNTIME_FILES = [
@@ -32,6 +36,7 @@ const RUNTIME_FILES = [
   'scripts/validate.mjs',
   'scripts/refdata.mjs',
   'scripts/asc-upload.mjs',
+  'scripts/selftest.mjs',
   'assets/canvases/screenshot.html',
   'assets/canvases/header.html',
   'assets/canvases/search.html',
@@ -127,11 +132,17 @@ async function main() {
   }
 
   const daemonUrl = await resolveDaemonUrl(typeof flags['daemon-url'] === 'string' ? flags['daemon-url'] : undefined);
+  const pluginIds = [
+    typeof flags['plugin-id'] === 'string' ? String(flags['plugin-id']) : null,
+    typeof process.env.OD_APP_STORE_PLUGIN_ID === 'string' ? process.env.OD_APP_STORE_PLUGIN_ID : null,
+    ...PLUGIN_ID_CANDIDATES,
+  ].filter(Boolean);
   const nodeMajor = Number(process.versions.node.split('.')[0]);
   if (nodeMajor < 20) fail(`Node 20+ required (found ${process.versions.node}).`);
 
   await fs.mkdir(outDir, { recursive: true });
   const written = [];
+  let manifestPluginId = 'local-checkout';
 
   if (localCheckout) {
     for (const rel of RUNTIME_FILES) {
@@ -142,14 +153,26 @@ async function main() {
       written.push(rel);
     }
   } else {
-    const base = `${daemonUrl}/api/plugins/${encodeURIComponent(PLUGIN_ID)}/asset`;
+    let base = null;
+    let resolvedId = null;
+    for (const id of pluginIds) {
+      const candidate = `${daemonUrl}/api/plugins/${encodeURIComponent(id)}/asset`;
+      const probe = await fetch(`${candidate}/${RUNTIME_FILES[0]}`).catch(() => null);
+      if (probe && probe.ok) { base = candidate; resolvedId = id; break; }
+    }
+    if (!base) {
+      fail(
+        `no installed plugin found for id(s): ${pluginIds.join(', ')}.\n` +
+        'Is the plugin installed and the OpenDesign app running? ' +
+        'For a local checkout run: node scripts/bootstrap.mjs --source <plugin folder>',
+      );
+    }
     for (const rel of RUNTIME_FILES) {
       const res = await fetch(`${base}/${rel}`);
       if (!res.ok) {
         fail(
           `could not fetch ${rel} from ${base} (HTTP ${res.status}).\n` +
-          'Is the plugin installed and the OpenDesign app running?\n' +
-          'For a local checkout run: node scripts/bootstrap.mjs --source <plugin folder>',
+          'Re-install the plugin or bootstrap with --source <plugin folder>.',
         );
       }
       const buf = Buffer.from(await res.arrayBuffer());
@@ -158,10 +181,11 @@ async function main() {
       await fs.writeFile(dest, buf);
       written.push(rel);
     }
+    manifestPluginId = resolvedId;
   }
 
   const manifest = {
-    plugin: PLUGIN_ID,
+    plugin: manifestPluginId,
     version: '0.1.0',
     bootstrappedAt: new Date().toISOString(),
     daemonUrl,
