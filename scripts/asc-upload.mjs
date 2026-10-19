@@ -523,27 +523,38 @@ async function cmdUpload(flags) {
       }
     }
 
-    // 3. Order each screenshot group by the plan's order.
-    const groupsToOrder = new Map();
-    for (const asset of selected) {
-      if (asset.kind !== 'screenshot' || String(asset.kind).startsWith('event')) continue;
+    // 3. Order every screenshot group from the FULL plan, not just this run's
+    // selection: a partial replacement (`--only shot-03`) must still land at its
+    // planned position inside a group that is already ordered, and the ordering
+    // request must name every placement in the group.
+    const screenshotAssets = plan.assets.filter((a) => a.kind === 'screenshot' && !String(a.kind || '').startsWith('event'));
+    const slotPrefixByAssetId = new Map(screenshotAssets.map((a) => [a.id, slotFor(a)]));
+    const orderByAssetId = new Map(screenshotAssets.map((a) => [a.id, Number(a.order || 0)]));
+
+    const orderGroups = new Map();
+    for (const asset of screenshotAssets) {
       const spec = getSpec(snapshot.data, asset.spec);
       const group = asset.placementGroup || spec.placementGroup || (typeof flags.group === 'string' ? flags.group : null);
+      if (!group) continue;
       const target = targetFor(asset.kind, versionLocalizations, null, locale, flags);
       if (target.targetType === 'appEventLocalization') continue;
-      const key = `${target.targetId}::${group}`;
-      if (!groupsToOrder.has(key)) groupsToOrder.set(key, { target, group, items: [] });
-      const action = actionById.get(asset.id);
-      if (!action) continue;
-      groupsToOrder.get(key).items.push({ order: Number(asset.order || 0), ref: action.referenceName });
+      orderGroups.set(`${target.targetId}::${group}`, { target, group });
     }
-    for (const { target, group, items } of groupsToOrder.values()) {
+    for (const { target, group } of orderGroups.values()) {
       const placements = await placementsFor(target.targetType, target.targetId, 'APP_SCREENSHOT', group);
-      const byRef = new Map(placements.map((p) => [p.referenceName, p.id]));
-      const ordered = items
-        .sort((a, b) => a.order - b.order)
-        .map((i) => byRef.get(i.ref))
-        .filter(Boolean);
+      if (placements.length < 2) continue;
+      const ranked = placements.map((placement, index) => {
+        let assetId = null;
+        for (const [id, slot] of slotPrefixByAssetId) {
+          if (isSlotOf(placement.referenceName, slot)) { assetId = id; break; }
+        }
+        const order = assetId != null ? orderByAssetId.get(assetId) : undefined;
+        return { placement, index, order: order == null ? Number.MAX_SAFE_INTEGER : order };
+      });
+      // Planned assets first, in plan order; anything not in the plan keeps its
+      // current relative position at the end so no placement is dropped.
+      ranked.sort((a, b) => (a.order - b.order) || (a.index - b.index));
+      const ordered = ranked.map((entry) => entry.placement.id).filter(Boolean);
       if (ordered.length > 1) {
         await asc.orderPlacements(config, {
           placementGroup: group,
