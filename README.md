@@ -146,6 +146,20 @@ The HTML preview is served from `preview/index.html` and must return
 - The validator catches mechanical failures. Apple's 4+ content judgment, "one
   clear idea", and claim verification still need human review.
 
+## Registry listings
+
+- **Canonical source** — https://github.com/marianif/od-plugin-app-store-assets
+- **OpenDesign community catalog** — PR
+  [nexu-io/open-design#8857](https://github.com/nexu-io/open-design/pull/8857)
+  (proposal: [#8856](https://github.com/nexu-io/open-design/issues/8856)); adds
+  `plugins/community/app-store-assets` + a catalog entry
+- **skills.sh** — verified install:
+  `npx skills add marianif/od-plugin-app-store-assets --skill app-store-assets`
+- **ClawHub** — dry-run verified; publish with
+  `npx clawhub login` then
+  `npx clawhub skill publish . --slug app-store-assets --name "App Store Assets" --version 0.1.0 --tags app-store,screenshots,ios,marketing`
+- **OpenDesign (local)** — `od plugin install --source ./od-plugin-app-store-assets`
+
 ## License
 
 MIT — see `LICENSE`.
