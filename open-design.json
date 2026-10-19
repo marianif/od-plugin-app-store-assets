@@ -7,6 +7,11 @@
   "publishedAt": "2026-10-18T00:00:00Z",
   "description": "Generate, validate and upload App Store artwork: screenshots, product-page header, search-results creative and In-App Event media, at Apple's exact specs and with the asset best-practices rules applied as a pre-flight check.",
   "license": "MIT",
+  "author": {
+    "name": "Federica Mariani",
+    "url": "https://github.com/marianif"
+  },
+  "homepage": "https://github.com/marianif/od-plugin-app-store-assets",
   "tags": [
     "create",
     "image",
