@@ -14,11 +14,15 @@ marketplace surface, the agent prompt, or the plugin preview.
    `scripts/asc-upload.mjs` as a separate `event create` subcommand, with its
    own confirmation gate.
 
-2. **Live ASC upload acceptance.**
-   The upload path is built against the App Asset Library API (ASC 4.5.1+), but
-   cannot be acceptance-tested until an App Store Connect API key is added.
-   Required: `.p8` key path, key id, issuer id, app id, and an App Manager (or
-   Admin/Account Holder) role. Until then, `asc-upload` is dry-run only.
+2. **Live ASC upload acceptance — verified once, re-verify with a fresh key.**
+   The upload path is built against the App Asset Library API (ASC 4.5.1+). It was
+   acceptance-tested on 2026-10-19: 8 iPhone screenshots placed and ordered, plus
+   the product-page header and the search-results creative, against a real App
+   Store Connect app with an App Manager key. What remains is not a blocker but a
+   maintenance task: re-run a dry-run then a real upload whenever the ASC API
+   version, the ref-data field names or the key change. Credentials come from
+   `~/.config/app-store-assets/config.json` or the environment (`.p8` path, key id,
+   issuer id, app id).
 
 3. **Locale expansion.**
    v1 defaults to `en-US`. The plan format, canvases, and validator are already

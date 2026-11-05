@@ -9,7 +9,7 @@ description: |
 license: MIT
 metadata:
   author: the-wedge
-  version: "0.1.0"
+  version: "0.1.1"
 od:
   mode: image
   scenario: marketing

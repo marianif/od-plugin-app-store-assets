@@ -4,6 +4,19 @@ All notable changes to this plugin are documented here. The plugin follows
 semantic versioning; `specVersion` (OpenDesign plugin spec) is separate from the
 plugin `version`.
 
+## 0.1.1 — 2026-11-05
+
+Housekeeping release: no behaviour change beyond the two fixes already on `main`
+since 0.1.0, packaged so an installed copy can be told apart from the original.
+
+- `fix`: order the full screenshot group from the plan, not just the first file
+  (the placement order in App Store Connect now matches the plan's `order` field).
+- `fix`: review findings on the plugin.
+- `docs`: `ROADMAP.md` no longer claims live upload acceptance is blocked pending
+  a key; it was verified on 2026-10-19 and is now a re-verification task.
+- `chore`: version bumped so `installed_plugins.version` distinguishes this build
+  from the 2026-10-18 local install.
+
 ## 0.1.0 — 2026-10-19
 
 First public release.

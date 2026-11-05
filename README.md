@@ -160,7 +160,7 @@ The HTML preview is served from `preview/index.html` and must return
   `npx skills add marianif/od-plugin-app-store-assets --skill app-store-assets`
 - **ClawHub** — dry-run verified; publish with
   `npx clawhub login` then
-  `npx clawhub skill publish . --slug app-store-assets --name "App Store Assets" --version 0.1.0 --tags app-store,screenshots,ios,marketing`
+  `npx clawhub skill publish . --slug app-store-assets --name "App Store Assets" --version 0.1.1 --tags app-store,screenshots,ios,marketing`
 - **OpenDesign (local)** — `od plugin install --source ./od-plugin-app-store-assets`
 
 ## License
